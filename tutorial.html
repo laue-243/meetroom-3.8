@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MeetRoom tutorial</title>
+<link rel="icon" type="image/png" href="logo.png">
+<style>
+:root,:root[data-theme="dark"]{--bg:#0f1115;--panel:#181b22;--panel2:#20242d;--tx:#eceef2;--mut:#9aa2b1;--ac:#5b97ff;--bd:#2a2f3a;--code:#12151b;--warn:#3b3014;--warnb:#6b5618;color-scheme:dark}
+:root[data-theme="sunset"]{--bg:#1a1218;--panel:#251a22;--panel2:#31232d;--tx:#f5ebe6;--mut:#b49a9f;--ac:#ff9a5b;--bd:#432f3a;--code:#1d141a;--warn:#3b2a14;--warnb:#6b4a18;color-scheme:dark}
+:root[data-theme="light"]{--bg:#f6f7f9;--panel:#ffffff;--panel2:#eef0f4;--tx:#16181d;--mut:#5d6675;--ac:#2563eb;--bd:#dde1e8;--code:#f1f3f7;--warn:#fff6dd;--warnb:#f0d98a;color-scheme:light}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px;padding:10px 18px}
+header b{font-size:1.05rem}header .sp{flex:1}
+header a,header button{color:var(--tx);background:var(--panel2);border:1px solid var(--bd);border-radius:10px;padding:6px 12px;font:inherit;font-size:.9rem;text-decoration:none;cursor:pointer}
+.wrap{max-width:1050px;margin:0 auto;display:flex;gap:36px;padding:24px 18px 80px}
+nav{width:210px;flex:none;position:sticky;top:76px;align-self:flex-start;max-height:calc(100vh - 100px);overflow:auto}
+nav a{display:block;padding:6px 10px;border-radius:8px;color:var(--mut);text-decoration:none;font-size:.92rem}
+nav a:hover{background:var(--panel2);color:var(--tx)}
+main{flex:1;min-width:0}
+h1{font-size:2rem;margin:.2em 0 .3em}
+h2{font-size:1.45rem;margin:2.2em 0 .5em;padding-top:.6em;border-top:1px solid var(--bd)}
+h3{font-size:1.1rem;margin:1.5em 0 .3em}
+p,li{color:var(--tx)}
+.lead{color:var(--mut);font-size:1.1rem}
+code,kbd{background:var(--code);border:1px solid var(--bd);border-radius:6px;padding:1px 6px;font:.88em ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+kbd{box-shadow:0 1px 0 var(--bd)}
+.card{background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:16px 18px;margin:14px 0}
+.note{background:var(--warn);border:1px solid var(--warnb);border-radius:12px;padding:12px 16px;margin:14px 0}
+.steps{counter-reset:s;list-style:none;padding:0}
+.steps li{counter-increment:s;position:relative;padding:4px 0 10px 44px}
+.steps li::before{content:counter(s);position:absolute;left:0;top:2px;width:30px;height:30px;border-radius:50%;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.95rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--bd);vertical-align:top}
+th{color:var(--mut);font-weight:600}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+details{background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:10px 16px;margin:8px 0}
+summary{cursor:pointer;font-weight:600}
+@media(max-width:820px){nav{display:none}.grid2{grid-template-columns:1fr}.wrap{padding-top:12px}}
+</style>
+</head>
+<body>
+<header>
+  <img src="logo.png" alt="" width="28" height="28" style="border-radius:7px"><b>MeetRoom tutorial</b><span class="sp"></span>
+  <button id="themeBtn">Theme</button>
+  <a href="index.html">Open MeetRoom</a>
+</header>
+<div class="wrap">
+<nav>
+  <a href="#what">What it is</a>
+  <a href="#start">Quick start</a>
+  <a href="#home">The home page</a>
+  <a href="#join">Starting &amp; joining</a>
+  <a href="#call">Video, mic &amp; screen</a>
+  <a href="#chat">Chat &amp; files</a>
+  <a href="#code">Code editor</a>
+  <a href="#people">People &amp; host controls</a>
+  <a href="#bans">Bans</a>
+  <a href="#settings">Settings</a>
+  <a href="#shortcuts">Editor shortcuts</a>
+  <a href="#trouble">Troubleshooting</a>
+  <a href="#feedback">Feedback</a>
+  <a href="#limits">Limits &amp; privacy</a>
+  <a href="#tips">Tips</a>
+</nav>
+<main>
+
+<h1>MeetRoom</h1>
+<p class="lead">Video calls, chat, file sharing and a shared code editor in one web page. Up to 10 people per room, no accounts and no installs.</p>
+
+<h2 id="what">What it is</h2>
+<p>MeetRoom is a single web page. One person creates a room and gets a 6-character code. Anyone with that code (or the invite link) can join. Everyone then connects <b>directly to each other</b> from their browsers, so there is no meeting server in the middle carrying your video.</p>
+<div class="grid2">
+  <div class="card"><b>In a room you can</b><ul><li>See and hear everyone</li><li>Mute yourself and turn your camera on and off</li><li>Share your screen</li><li>Chat and send files</li><li>Edit code together in a VS Code style editor</li></ul></div>
+  <div class="card"><b>The room creator (host) can</b><ul><li>Mute people or stop their video</li><li>Stop guests from turning mic or video back on</li><li>Remove people from the room</li><li>Ban people so they cannot rejoin</li></ul></div>
+</div>
+
+<h2 id="start">Quick start</h2>
+<ol class="steps">
+  <li><b>Open MeetRoom</b> in Chrome, Edge, Firefox or Safari. You land on the home page, which has <b>Home</b>, <b>Features</b>, <b>Tutorial</b> and <b>Feedback</b> tabs.</li>
+  <li><b>Type your name</b> and click <b>Start meeting</b>. Allow the camera and microphone when your browser asks.</li>
+  <li><b>Click "Copy invite link"</b> at the top and send it to the people you want. They open the link, type a name and click <b>Join</b>.</li>
+  <li><b>Talk.</b> Their video appears as tiles as they arrive.</li>
+</ol>
+
+<h2 id="home">The home page</h2>
+<p>The home page is where everything starts. It has a tab bar across the top:</p>
+<table>
+<tr><th>Tab</th><th>What is there</th></tr>
+<tr><td>Home</td><td>The <b>Start meeting</b> button, a box to join with a code, and the <b>Themes</b> card.</td></tr>
+<tr><td>Features</td><td>A quick overview of what MeetRoom can do.</td></tr>
+<tr><td>Tutorial</td><td>This guide, which opens in a new tab.</td></tr>
+<tr><td>Feedback</td><td>A form to send ideas, bug reports or praise to the site owner.</td></tr>
+</table>
+<p>The <b>⚙ Settings</b> button at the right of the tab bar opens your settings. Inside a meeting, the <b>?</b> button in the top bar opens this tutorial.</p>
+
+<h2 id="join">Starting and joining a meeting</h2>
+<h3>Start</h3>
+<p>Click <b>Start meeting</b> on the home page. You become the host and get a random 6-character code shown at the top of the room with a <b>Host</b> badge.</p>
+<h3>Join</h3>
+<p>Type the code into the code box and click <b>Join</b>, or just open the invite link, which fills the code in for you. Codes are not case sensitive.</p>
+<h3>Room full</h3>
+<p>A room holds <b>10 people</b>: the host plus 9 guests. An 11th person sees "This room is full".</p>
+<h3>No camera or microphone?</h3>
+<p>You can still join. MeetRoom lets you in without them, and you can chat, share your screen, send files and edit code. If you deny permission by mistake, click the lock icon in your browser's address bar, allow camera and microphone, and reload.</p>
+<div class="note"><b>Anyone with the code can join</b>, so share it only with people you trust. The host can remove or ban people who should not be there.</div>
+
+<h2 id="call">Video, microphone and screen sharing</h2>
+<p>The bar at the bottom of the room has the call controls.</p>
+<table>
+<tr><th>Button</th><th>What it does</th></tr>
+<tr><td>🎤 Mute / Unmute</td><td>Turns your microphone off or on. A 🔇 icon appears on your tile for everyone else.</td></tr>
+<tr><td>📷 Stop video / Start video</td><td>Turns your camera off or on. When off, others see a letter avatar instead.</td></tr>
+<tr><td>🖥 Share screen</td><td>Your browser asks what to share (screen, window or tab). Your video tile switches to it. Click <b>Stop sharing</b> or use the browser's own stop button to go back to your camera.</td></tr>
+<tr><td>Leave</td><td>Leaves the room and returns to the start page.</td></tr>
+</table>
+<p><b>Click any video tile</b> to make it larger and click again to shrink it. This is handy when someone shares a screen.</p>
+<p><b>Use headphones</b> if you can. Without them the microphone can pick up your speakers and cause echo.</p>
+<div class="note">If the host has turned off "Participants can unmute themselves" or "turn on video", the mic, camera and screen buttons will tell you the host disabled them.</div>
+
+<h2 id="chat">Chat and files</h2>
+<h3>Chat</h3>
+<p>The <b>Chat</b> tab shows messages from everyone in the room, along with notices when people join or leave. Messages are not saved. Anyone who joins later does not see earlier messages, and everything is gone when you leave.</p>
+<h3>Sending files</h3>
+<ol>
+  <li>Open the <b>Files</b> tab and choose a file (up to <b>2 GB</b>).</li>
+  <li>Everyone in the room sees an offer with <b>Accept</b> and <b>Decline</b> buttons. Nothing is sent to someone until they accept.</li>
+  <li>On Chrome or Edge on a computer, Accept asks where to save the file and writes it straight to disk, so even huge files work. In other browsers the file is collected in the browser and a <b>Download</b> link appears at the end.</li>
+  <li>Progress bars show the transfer. Receivers can <b>Cancel</b> at any time.</li>
+</ol>
+<p>Only people in the room when you offer the file can receive it, and it is not stored anywhere afterwards. Keep the tab open until it finishes. If the sender or receiver leaves, the transfer stops.</p>
+<div class="note"><b>About very large files:</b> a 2 GB transfer can take many minutes and depends on both internet connections. It is best sent to one or a few people, because you upload a separate copy to each person who accepts. On phones, and in Firefox or Safari, files over about 500 MB may run out of memory, so use Chrome or Edge on a computer for those.</div>
+
+<h2 id="code">The code editor</h2>
+<p>Open the <b>Code</b> tab. The first time, it loads the same editor engine that powers Visual Studio Code (called Monaco). That takes a few seconds and needs an internet connection. If it cannot load, MeetRoom falls back to a basic text box that still syncs between everyone.</p>
+<h3>Editing together</h3>
+<ul>
+  <li>Everyone edits <b>one shared document</b> at the same time. Changes appear instantly, and if two people type in different places nothing is lost.</li>
+  <li>You see other people's <b>cursors and selections</b> in their own color. Hover a cursor to see whose it is.</li>
+  <li>People who join later receive the current code automatically.</li>
+  <li>Pick a <b>language</b> from the drop-down. It changes for everyone, so colors and checking match.</li>
+  <li>Click <b>Expand</b> to widen the side panel for more room (and <b>Shrink</b> to go back).</li>
+</ul>
+<h3>Editor features</h3>
+<ul>
+  <li>Syntax colors, line numbers, code folding, bracket matching and colored bracket pairs</li>
+  <li>Auto-closing brackets and quotes, auto-indent, and word suggestions</li>
+  <li>Find and replace, multiple cursors, and move or copy lines (see the shortcuts below)</li>
+  <li><b>Commands</b> button (or <kbd>F1</kbd>) opens the command palette with every editor action</li>
+  <li><b>Copy</b> copies everything and <b>Download</b> saves it as <code>shared.js</code>, <code>shared.py</code> and so on, based on the language</li>
+  <li>Automatic formatting, tag completion and snippets, explained next</li>
+</ul>
+
+<h3>Formatting (Prettier)</h3>
+<p>Click <b>Format</b>, press <kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>F</kbd>, or press <kbd>Ctrl</kbd>+<kbd>S</kbd> (<kbd>⌘</kbd>+<kbd>S</kbd> on a Mac) to tidy the whole document with <b>Prettier</b>, the same formatter many VS Code users rely on. It fixes indentation, spacing, line breaks and quotes in one go.</p>
+<ul>
+  <li>Prettier handles <b>JavaScript, TypeScript, JSON, CSS, HTML and Markdown</b>. The first time you use it, it downloads in a second or two.</li>
+  <li><b>Missing brackets are completed.</b> If Prettier cannot format because a <code>)</code>, <code>]</code> or <code>}</code> is missing, the editor adds the missing closers in sensible places (using your indentation as a guide) and then formats. In HTML it adds missing closing tags. A toast tells you how many were added, and one <kbd>Ctrl</kbd>+<kbd>Z</kbd> undoes it.</li>
+  <li>Other syntax errors are reported with what and where, and nothing is changed. Fix the error and format again.</li>
+  <li>For Python, Java, C++, Go, Rust, SQL and CSS the same bracket completion runs before the built-in formatting. You can also run it on its own from the command palette (<kbd>F1</kbd>, then "Complete Missing Brackets").</li>
+  <li>For other languages, Format uses the editor's built-in formatter if there is one, or trims extra spaces at the ends of lines.</li>
+  <li>Only the parts that change are edited, so formatting does not wipe out what other people are typing. If someone edits while it runs, you will be asked to try again.</li>
+  <li>Format on save, format as you type and bracket completion can each be switched off in Settings.</li>
+</ul>
+
+<h3>Tab expansion for HTML tags</h3>
+<p>Choose <b>HTML</b> in the language drop-down. Type a tag name and press <kbd>Tab</kbd> and the editor writes the opening and closing tags and puts your cursor inside. This works like Emmet in VS Code.</p>
+<table>
+<tr><th>Type, then press Tab</th><th>You get</th></tr>
+<tr><td><code>div</code></td><td><code>&lt;div&gt;&lt;/div&gt;</code> with the cursor between the tags</td></tr>
+<tr><td><code>a</code></td><td><code>&lt;a href=""&gt;&lt;/a&gt;</code>, then Tab again to jump to the link text</td></tr>
+<tr><td><code>img</code></td><td><code>&lt;img src="" alt=""&gt;</code></td></tr>
+<tr><td><code>.card</code> or <code>#app</code></td><td>A <code>div</code> with that class or id</td></tr>
+<tr><td><code>p.intro{Hello}</code></td><td><code>&lt;p class="intro"&gt;Hello&lt;/p&gt;</code></td></tr>
+<tr><td><code>ul&gt;li*3</code></td><td>A list with three items, each on its own line</td></tr>
+<tr><td><code>li.item$*3</code></td><td>Three items with classes <code>item1</code>, <code>item2</code>, <code>item3</code></td></tr>
+<tr><td><code>nav&gt;ul&gt;li*2&gt;a</code></td><td>A nested menu with two links</td></tr>
+<tr><td><code>h2+p</code></td><td>A heading followed by a paragraph (<code>+</code> means next to)</td></tr>
+<tr><td><code>!</code></td><td>A complete HTML page skeleton</td></tr>
+</table>
+<p>Quick key: <code>&gt;</code> puts a tag inside the previous one, <code>+</code> puts one beside it, <code>*3</code> repeats it, <code>.</code> adds a class, <code>#</code> adds an id, <code>[title=hi]</code> adds attributes, <code>{text}</code> adds text, and <code>^</code> climbs back up a level. After expanding, press <kbd>Tab</kbd> to move between the empty spots.</p>
+<p>The suggestion list also shows the expansion as you type, so you can press <kbd>Tab</kbd> or <kbd>Enter</kbd> to accept it.</p>
+
+<h3>Auto-close tags</h3>
+<ul>
+  <li>Type <code>&lt;section&gt;</code> and the closing <code>&lt;/section&gt;</code> appears right after it, with your cursor in the middle.</li>
+  <li>Type <code>&lt;/</code> and the editor fills in the name of the tag that is still open.</li>
+  <li>Rename an opening tag and its matching closing tag changes with it.</li>
+  <li>Tags that never close, like <code>&lt;br&gt;</code> and <code>&lt;img&gt;</code>, are left alone.</li>
+</ul>
+
+<h3>Suggestions and snippets</h3>
+<ul>
+  <li><b>Brackets:</b> when you type <code>(</code>, <code>[</code> or <code>{</code> a suggestion list opens, and the closing bracket is added for you.</li>
+  <li><b>Snippets in other languages:</b> type a short word at the start of a line and press <kbd>Tab</kbd>. For example <code>log</code> in JavaScript becomes <code>console.log()</code>.</li>
+</ul>
+<table>
+<tr><th>Language</th><th>Words to try</th></tr>
+<tr><td>JavaScript / TypeScript</td><td><code>log</code> <code>fn</code> <code>af</code> <code>for</code> <code>forof</code> <code>if</code> <code>ife</code> <code>try</code> <code>imp</code> <code>cls</code> <code>fetch</code> <code>tm</code> (TypeScript also <code>interface</code> and <code>type</code>)</td></tr>
+<tr><td>Python</td><td><code>def</code> <code>class</code> <code>if</code> <code>ife</code> <code>for</code> <code>while</code> <code>try</code> <code>with</code> <code>main</code> <code>pr</code> <code>imp</code></td></tr>
+<tr><td>Java</td><td><code>main</code> <code>sout</code> <code>class</code> <code>for</code> <code>fore</code> <code>if</code> <code>try</code></td></tr>
+<tr><td>C++</td><td><code>main</code> <code>inc</code> <code>cout</code> <code>for</code> <code>if</code> <code>class</code> <code>vec</code></td></tr>
+<tr><td>Go</td><td><code>main</code> <code>func</code> <code>for</code> <code>iferr</code> <code>fmt</code> <code>if</code></td></tr>
+<tr><td>Rust</td><td><code>main</code> <code>fn</code> <code>for</code> <code>pl</code> <code>match</code></td></tr>
+<tr><td>SQL</td><td><code>sel</code> <code>ins</code> <code>upd</code> <code>del</code> <code>ct</code></td></tr>
+<tr><td>CSS</td><td><code>flex</code> <code>grid</code> <code>abs</code> <code>media</code> <code>trans</code></td></tr>
+</table>
+<p>Everything on this list can be switched off in <b>Settings → Chat &amp; editor</b>.</p>
+
+<h3>File explorer (files on your computer)</h3>
+<p>Click <b>📁 Files</b> in the Code tab to open the explorer. It lets you browse, open, edit, save and organise real files and folders on <b>your own computer</b>.</p>
+<div class="note"><b>Nothing in the explorer is shared.</b> Your folders and files stay on your computer. Other people in the room do not see them and cannot open them. Only the <b>Live document</b> is shared with the room, and you decide if and when to copy something into it.</div>
+<ol class="steps">
+  <li>Click <b>Files</b>, then <b>Open folder</b> (or the 📂 button) and choose a folder. Your browser asks for permission to read and change it. Pick a project folder, because browsers may refuse very broad folders such as all of Documents or Downloads.</li>
+  <li>Click a folder to open or close it, and click a file to open it in a tab. You can have many files open and switch between them with the tabs above the editor. A dot on a tab means unsaved changes.</li>
+  <li>Press <kbd>Ctrl</kbd>+<kbd>S</kbd> (<kbd>⌘</kbd>+<kbd>S</kbd> on a Mac) or the <b>Save</b> button to write the file back to your computer. With <b>Format on save</b> on, it is formatted first.</li>
+</ol>
+<h3>Making folders and subfolders</h3>
+<ul>
+  <li>Use the <b>📄</b> (new file) and <b>📁</b> (new folder) buttons at the top of the explorer. They create the item inside the folder you last clicked, or at the top level.</li>
+  <li>Hover over a folder in the list to see its own <b>📄</b> and <b>📁</b> buttons for adding something directly inside it. On a touch screen, tap the folder first.</li>
+  <li>Type a path to make several levels at once. For example <code>src/components/Button.js</code> creates the folders <code>src</code> and <code>components</code> and the file inside them.</li>
+  <li>The <b>🗑</b> button deletes a file or a folder with everything in it, after asking you to confirm. It cannot be undone.</li>
+  <li><b>⟳</b> refreshes the list if you changed files outside the editor.</li>
+</ul>
+<p>The <b>Live (shared)</b> tab is always the first tab. It is the document everyone in the room edits together, so switching to it never changes your local files.</p>
+<h3>Moving code between your files and the room</h3>
+<table>
+<tr><th>Button (bottom of the explorer)</th><th>What it does</th></tr>
+<tr><td>Send file to live doc</td><td>Asks you to confirm, then replaces the shared document, for everyone in the room, with the file that is open.</td></tr>
+<tr><td>Save live doc to folder</td><td>Saves the current shared document as a new file inside your selected folder.</td></tr>
+</table>
+<h3>Which browsers can open real folders?</h3>
+<ul>
+  <li><b>Chrome and Edge on a computer:</b> full access to real folders on your disk. MeetRoom can even offer to reopen your last folder next time.</li>
+  <li><b>Firefox, Safari and phones:</b> browsers do not allow websites to open real folders, so MeetRoom gives you a <b>private workspace stored inside the browser</b> instead. It has the same folders, files and tabs, but it lives in the browser (about 5 MB), not on your disk. Use <b>Download</b> to keep a copy.</li>
+</ul>
+<p>Files over 2 MB and binary files such as images are not opened. If you close the page with unsaved changes, your browser warns you first.</p>
+
+<h3>Error checking</h3>
+<p>Problems are underlined in red (errors) or yellow (warnings) as you type. Hover the underline to read the message. The bar under the editor shows the cursor position and error counts, and <b>Next problem</b> (<kbd>F8</kbd>) jumps to the next one.</p>
+<table>
+<tr><th>Language</th><th>What gets checked</th></tr>
+<tr><td>JavaScript</td><td>Syntax errors, plus suggestions as you type</td></tr>
+<tr><td>TypeScript</td><td>Syntax and type errors, with quick fixes (<kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>.</kbd>) and formatting</td></tr>
+<tr><td>JSON</td><td>Invalid JSON, plus formatting</td></tr>
+<tr><td>CSS</td><td>Invalid or unknown properties, plus formatting</td></tr>
+<tr><td>HTML</td><td>Tag suggestions and formatting</td></tr>
+<tr><td>Python</td><td>Unclosed or mismatched brackets and quotes, missing <code>:</code> after <code>if</code>/<code>for</code>/<code>def</code> and similar, Python 2 style <code>print</code>, and mixed tabs and spaces</td></tr>
+<tr><td>Java, C++, Go, Rust, SQL</td><td>Unclosed or mismatched brackets, unclosed strings and unclosed comments</td></tr>
+<tr><td>Markdown, plain text</td><td>Colors only</td></tr>
+</table>
+<div class="note">The checks for Python, Java, C++, Go, Rust and SQL are <b>basic</b>. They catch common typos but are not a real compiler, so code with no underlines can still have bugs. You can turn all checking off in Settings.</div>
+<p><b>Undo tip:</b> if two people edit the same spot, undo (<kbd>Ctrl</kbd>+<kbd>Z</kbd>) can behave in surprising ways because it works on your own typing. Copy anything important before experimenting.</p>
+
+<h2 id="people">People and host controls</h2>
+<p>The <b>People</b> tab lists everyone with their mic and camera status. The host also sees buttons next to each guest.</p>
+<table>
+<tr><th>Host action</th><th>Effect</th></tr>
+<tr><td>Mute</td><td>Turns that person's microphone off. They can unmute again unless you disabled that.</td></tr>
+<tr><td>Stop video</td><td>Turns their camera off and stops their screen share.</td></tr>
+<tr><td>Remove</td><td>Sends them out of the room. They can rejoin with the code.</td></tr>
+<tr><td>Ban</td><td>Removes them and blocks them from rejoining (see below).</td></tr>
+</table>
+<p>In <b>Settings → Host controls</b> the host can:</p>
+<ul>
+  <li>Turn off <b>"Participants can unmute themselves"</b> so guests stay muted until the host allows it</li>
+  <li>Turn off <b>"Participants can turn on video / share screen"</b></li>
+  <li>Click <b>Mute all</b> or <b>Stop all video</b></li>
+</ul>
+<p>Only the host's browser can send these commands. Other people cannot pretend to be the host.</p>
+<div class="note"><b>Honest limit:</b> these controls are enforced by each guest's browser. They work for normal use, but someone who deliberately modifies the page code could ignore them. Stronger enforcement needs a dedicated video server.</div>
+<p>If the host closes the page, host controls are unavailable until they return. The host can get back into their room from the <b>same browser</b> by joining with the code again.</p>
+
+<h2 id="bans">Bans</h2>
+<ul>
+  <li>Click <b>Ban</b> next to a person in the People tab. They are removed and see "You have been banned from this room."</li>
+  <li>If they try to rejoin, they are removed again, and other guests disconnect from them too.</li>
+  <li>The <b>Banned people</b> list in Settings → Host controls lets you <b>Unban</b> anyone.</li>
+  <li>The ban list is kept in the host's browser, so it is still there if the host leaves and returns.</li>
+</ul>
+<div class="note">Bans are tied to a random ID stored in each person's browser. They stop casual rejoining, but someone who clears their site data, uses a private window or switches browser could get back in. If that happens, ban them again, or create a new room and share the new code only with trusted people.</div>
+
+<h2 id="settings">Settings</h2>
+<p>Click <b>⚙</b> (top right of the room, or <b>Settings</b> on the start page). Everything is saved in your browser.</p>
+<table>
+<tr><th>Section</th><th>What you can change</th></tr>
+<tr><td>General</td><td>Display name, accent color, text size, show names on tiles, mirror your own video, hide your own tile, join and message sounds, and reset everything</td></tr>
+<tr><td>Audio &amp; video</td><td>Choose microphone, camera and speaker (while in a room), video quality (Low, Medium or High), echo cancellation, noise suppression and auto gain</td></tr>
+<tr><td>Chat &amp; editor</td><td>Editor font size, tab width, line wrapping, error checking, line numbers, minimap, format on save, format as you type, auto-close tags, snippets and Tab expansion, suggestions when you open a bracket, and completing missing brackets when formatting</td></tr>
+<tr><td>Host controls</td><td>Only for the host: permissions for guests, mute and stop all, and the ban list</td></tr>
+</table>
+<p>If calls stutter, lower <b>Video quality</b> first.</p>
+<h3>Themes</h3>
+<p>Themes live on the <b>Home</b> tab. There are three built in: <b>Midnight</b> (dark), <b>Daylight</b> (light) and <b>Sunset</b> (warm dark). You choose two things separately:</p>
+<ul>
+  <li><b>Interface theme</b> for the home page, menus and settings. It can also be <b>System</b>, which follows your device.</li>
+  <li><b>Meeting theme</b> for the video room, chat and code editor. It can be <b>Same as interface</b> or any of the three.</li>
+</ul>
+<p>For example, you can browse the app in Daylight and sit in meetings in Midnight. Inside a meeting, the <b>🌓</b> button in the top bar cycles the meeting theme.</p>
+
+<h2 id="shortcuts">Editor shortcuts</h2>
+<p>On a Mac use <kbd>⌘</kbd> instead of <kbd>Ctrl</kbd> and <kbd>Option</kbd> instead of <kbd>Alt</kbd>.</p>
+<table>
+<tr><th>Shortcut</th><th>Action</th></tr>
+<tr><td><kbd>F1</kbd></td><td>Command palette</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>Ctrl</kbd>+<kbd>H</kbd></td><td>Find / Find and replace</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>D</kbd></td><td>Select the next match of the current word (repeat to add more)</td></tr>
+<tr><td><kbd>Alt</kbd>+click</td><td>Add another cursor</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>↑</kbd> / <kbd>↓</kbd></td><td>Move the line up or down</td></tr>
+<tr><td><kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>↑</kbd> / <kbd>↓</kbd></td><td>Copy the line up or down</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>/</kbd></td><td>Comment or uncomment the line</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Space</kbd></td><td>Show suggestions</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>.</kbd></td><td>Quick fix (TypeScript)</td></tr>
+<tr><td><kbd>F8</kbd></td><td>Next problem</td></tr>
+<tr><td><kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>F</kbd></td><td>Format the document with Prettier</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Format, and save the file if it is a local file</td></tr>
+<tr><td><kbd>Tab</kbd></td><td>Expand a tag abbreviation or snippet, or jump to the next empty spot</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>G</kbd></td><td>Go to line</td></tr>
+</table>
+
+<h2 id="trouble">Troubleshooting</h2>
+<details><summary>The browser never asks for my camera or microphone</summary>
+<p>Check that you have not blocked the permission for this site (click the lock icon in the address bar and allow camera and microphone, then reload). Also close any other app that may be using the camera, such as another video call.</p></details>
+<details><summary>"Could not reach the connection server"</summary>
+<p>MeetRoom uses a free public connection service to introduce people to each other. Check your internet, and check that a firewall, VPN or ad blocker is not blocking <code>peerjs.com</code> and <code>cdn.jsdelivr.net</code>.</p></details>
+<details><summary>We joined the same room but cannot see or hear each other</summary>
+<p>Some company, school or mobile networks block direct connections between devices. Try another network (for example mobile data instead of office Wi-Fi) and turn off any VPN. Also confirm everyone is on the exact same code.</p></details>
+<details><summary>Video is choppy or the page is slow with many people</summary>
+<p>Everyone sends video to everyone else, so load grows quickly. Lower Video quality in Settings, ask people to turn cameras off when not needed, and keep cameras-on groups to about 4 to 6 people.</p></details>
+<details><summary>I hear an echo</summary>
+<p>Use headphones, or mute when you are not speaking. Keep Echo cancellation on in Settings.</p></details>
+<details><summary>The explorer says my browser cannot open folders</summary>
+<p>Only Chrome and Edge on a computer can open real folders. In other browsers you get a private workspace inside the browser instead. If you are on Chrome or Edge and the folder will not open, choose a project folder rather than a system folder such as Documents or Downloads.</p></details>
+<details><summary>Ctrl+S did not save my file</summary>
+<p>Ctrl+S only saves files opened from the explorer. In the Live (shared) tab there is nothing to save because changes sync instantly, so use <b>Download</b> or <b>Save live doc to folder</b> to keep a copy.</p></details>
+<details><summary>The code editor never loads</summary>
+<p>It downloads from <code>cdn.jsdelivr.net</code>, which must be reachable. If it cannot load within about 25 seconds you get the basic text box instead. Reload to try again.</p></details>
+<details><summary>"This room is full"</summary>
+<p>All 10 spots are taken. Ask someone to leave, or start a second room.</p></details>
+<details><summary>The host controls are missing</summary>
+<p>Only the person who clicked <b>Start meeting</b> is the host. If you created the room, make sure you rejoin from the same browser you created it in.</p></details>
+<details><summary>Screen sharing is not available</summary>
+<p>Most phones and some tablets cannot share their screen from a browser. Use a laptop or desktop for that.</p></details>
+
+<h2 id="feedback">Sending feedback</h2>
+<ol class="steps">
+  <li>On the home page, open the <b>Feedback</b> tab.</li>
+  <li>Choose a type (Idea, Bug, Praise or Other), optionally give a star rating, and write your message.</li>
+  <li>Add your name and email only if you would like a reply, then click <b>Send feedback</b>.</li>
+</ol>
+<p>Your message is emailed to the person who runs this site. Please do not include passwords or private information. If automatic sending fails, the page offers a link to send it with your own email app instead.</p>
+
+<h2 id="limits">Limits and privacy</h2>
+<table>
+<tr><th>Topic</th><th>What to know</th></tr>
+<tr><td>Room size</td><td>10 people including the host.</td></tr>
+<tr><td>Performance</td><td>Best with 4 to 6 cameras on. Beyond that, expect lower quality. Very large meetings need a video server.</td></tr>
+<tr><td>Files</td><td>Up to 2 GB each, sent live to people in the room who accept them, never stored.</td></tr>
+<tr><td>History</td><td>Nothing is recorded or saved: no chat history, no recordings, no stored code. Download the code before you leave.</td></tr>
+<tr><td>Who can join</td><td>Anyone who has the code. There are no accounts or passwords.</td></tr>
+<tr><td>Encryption</td><td>Video, audio and data go directly between browsers over encrypted WebRTC connections.</td></tr>
+<tr><td>What the connection service sees</td><td>A public service helps people find each other. It sees the room-based ID and the network addresses needed to connect, not your video, chat, files or code.</td></tr>
+<tr><td>Files in the explorer</td><td>They stay on your computer, or in the private browser workspace, and are never sent to the room unless you press "Send file to live doc".</td></tr>
+<tr><td>Stored in your browser</td><td>Your settings, your name, a random browser ID (used for bans), and for hosts, which rooms they created and their ban lists.</td></tr>
+<tr><td>Feedback</td><td>Whatever you type in the Feedback tab is sent by email to the site owner through the FormSubmit service. It is not part of any meeting.</td></tr>
+<tr><td>Loaded from the internet</td><td>PeerJS, Yjs, the Monaco editor and (when you first format) Prettier are loaded from the jsDelivr CDN.</td></tr>
+</table>
+<p>Do not use MeetRoom for highly sensitive meetings without adding authentication and your own servers.</p>
+
+<h2 id="tips">Tips for a good meeting</h2>
+<ul>
+  <li>Use <b>headphones</b> and sit somewhere with good light facing a window.</li>
+  <li>Mute when you are not speaking, especially in bigger rooms.</li>
+  <li>Lower <b>Video quality</b> or turn off cameras if the call is choppy.</li>
+  <li>Send the <b>invite link</b> rather than the bare code. It fills the code in for people.</li>
+  <li>Download the shared code before you leave. Nothing is saved once the room is empty.</li>
+  <li>Hosts: ban or remove anyone who should not be there, and think twice before posting the room code publicly.</li>
+</ul>
+
+</main>
+</div>
+<script>
+(function(){
+  var o=['system','midnight','daylight','sunset'],k='mr_settings',mq=window.matchMedia('(prefers-color-scheme: dark)');
+  function get(){try{return JSON.parse(localStorage.getItem(k)||'{}')}catch(e){return {}}}
+  function norm(t){return t==='light'?'daylight':t==='dark'?'midnight':(t||'system')}
+  function apply(){var t=norm(get().theme),m=t==='system'?(mq.matches?'dark':'light'):t==='daylight'?'light':t==='midnight'?'dark':'sunset';document.documentElement.setAttribute('data-theme',m);document.getElementById('themeBtn').textContent='Theme: '+t}
+  document.getElementById('themeBtn').onclick=function(){var s=get(),t=norm(s.theme);s.theme=o[(o.indexOf(t)+1)%o.length];try{localStorage.setItem(k,JSON.stringify(s))}catch(e){}apply()};
+  mq.addEventListener&&mq.addEventListener('change',apply);apply();
+})();
+</script>
+</body>
+</html>

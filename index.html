@@ -1,0 +1,1913 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="midnight">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MeetRoom</title>
+<meta name="description" content="Free video meetings with chat, file sharing and a live code editor. No sign-up, just a room code.">
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+<style>
+/* three built-in themes. The interface and the meeting room can each use a different one. */
+:root,[data-theme="midnight"]{--bg:#0f1115;--panel:#181b22;--panel2:#20242d;--tx:#eceef2;--mut:#8b93a1;--bd:#2a2f3a;--me:#25407a;--ed:#12151b;--edtx:#e6e9ef;--overlay:#000a;--offbg:#3a1d20;--offbd:#5c2a2f;--offtx:#ffb4b7;color-scheme:dark}
+[data-theme="daylight"]{--bg:#f3f4f7;--panel:#ffffff;--panel2:#eef0f4;--tx:#16181d;--mut:#667085;--bd:#dde1e8;--me:#dce9ff;--ed:#fbfbfc;--edtx:#1c1f26;--overlay:#0007;--offbg:#fde8e9;--offbd:#f3b9bc;--offtx:#a4262c;color-scheme:light}
+[data-theme="sunset"]{--bg:#1a1218;--panel:#251a22;--panel2:#31232d;--tx:#f5ebe6;--mut:#b49a9f;--bd:#432f3a;--me:#6b3a3a;--ed:#1d141a;--edtx:#f3e6e0;--overlay:#000a;--offbg:#4a2020;--offbd:#7a3535;--offtx:#ffc2b8;color-scheme:dark}
+:root{--ac:#4c8dff;--red:#e5484d;--ok:#30a46c}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+html{font-size:15px}
+body{background:var(--bg);color:var(--tx);font:1rem/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+button,input,select,textarea{font:inherit;color:var(--tx)}
+button{background:var(--panel2);border:1px solid var(--bd);border-radius:10px;padding:9px 14px;cursor:pointer}
+button:hover{border-color:var(--ac)}
+button.pri{background:var(--ac);border-color:var(--ac);color:#fff}
+button.sm{padding:4px 9px;font-size:.85rem}
+input,select{background:var(--panel2);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;width:100%}
+input[type=checkbox]{width:auto;accent-color:var(--ac);transform:scale(1.2)}
+input[type=range]{padding:0}
+.hidden{display:none!important}
+
+/* lobby */
+#lobby{height:100%;overflow:auto}
+#hnav{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:4px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--bd);overflow-x:auto;white-space:nowrap}
+#hnav b{margin-right:12px;font-size:1.1rem}
+.logo{width:28px;height:28px;border-radius:7px;margin-right:8px;flex:none}
+#top .logo{margin-right:4px}
+#hnav .tab{border:0;background:transparent;color:var(--mut);border-radius:8px;padding:8px 12px;text-decoration:none;font-size:.95rem;cursor:pointer;display:inline-block}
+#hnav .tab:hover{color:var(--tx)}
+#hnav .tab.on{color:var(--tx);background:var(--panel2)}
+#hnav .sp{flex:1}
+.view{display:none;max-width:980px;margin:0 auto;padding:30px 16px 60px}
+.view.on{display:block}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:30px;align-items:center}
+.hero h1{font-size:2.4rem;line-height:1.15;margin:0 0 12px}
+.hero .lead{color:var(--mut);font-size:1.1rem;margin:0 0 16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips span{background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:4px 12px;font-size:.85rem}
+.feat{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:28px}
+.feat .f{background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:16px}
+.feat .f b{display:block;margin-bottom:4px}
+.feat .f span{color:var(--mut);font-size:.92rem}
+.view h2.vt{margin:0 0 6px;font-size:1.6rem}
+.view .sub{color:var(--mut);margin:0 0 8px}
+#fbForm label{display:block;margin:14px 0 5px;color:var(--mut);font-size:.88rem}
+#fbForm textarea{width:100%;min-height:130px;background:var(--panel2);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;resize:vertical}
+#fbStars{display:flex;gap:4px}
+#fbStars button{font-size:1.5rem;line-height:1;padding:4px 8px;background:transparent;border:0;color:var(--mut)}
+#fbStars button.on{color:#f5b301}
+#fbStatus{margin-top:12px;font-size:.9rem}
+#fbStatus.ok{color:var(--ok)}#fbStatus.err{color:#ff8a8d}#fbStatus a{color:var(--ac)}
+.fine{color:var(--mut);font-size:.8rem;margin-top:10px}
+.card h2{margin:0 0 12px;font-size:1.2rem}
+.throw{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 18px}
+.thm{border:2px solid var(--bd);border-radius:12px;padding:14px 16px;min-width:130px;text-align:left;font-weight:600}
+.thm small{display:block;font-weight:400;opacity:.75;font-size:.78rem}
+.thm.on{border-color:var(--ac);box-shadow:0 0 0 2px var(--ac)}
+.thlabel{font-weight:600;margin-top:6px}.thlabel small{color:var(--mut);font-weight:400;margin-left:6px}
+.file .acts{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}.file .acts:empty{display:none}
+.file .fst{color:var(--mut);font-size:.85rem;margin-top:2px}
+@media(max-width:760px){.hero{grid-template-columns:1fr}.hero h1{font-size:1.9rem}}
+.card{background:var(--panel);border:1px solid var(--bd);border-radius:18px;padding:28px;width:100%;max-width:400px}
+.card h1{margin:0 0 4px;font-size:1.7rem}
+.card p{margin:0 0 18px;color:var(--mut)}
+.card .row{display:flex;gap:8px;margin-top:10px}
+.card .or{text-align:center;color:var(--mut);margin:16px 0 4px;font-size:.85rem}
+#codeIn{text-transform:uppercase;letter-spacing:.25em;text-align:center;font-weight:700}
+#lobbyMsg{color:#ff8a8d;font-size:.85rem;min-height:18px;margin-top:12px}
+
+/* room */
+#room{height:100%;display:flex;flex-direction:column;background:var(--bg);color:var(--tx)}
+#top{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--bd);background:var(--panel)}
+#top b{letter-spacing:.2em}
+.badge{font-size:.72rem;background:var(--ac);color:#fff;border-radius:6px;padding:1px 6px;margin-left:4px}
+#top .sp{flex:1}
+.pill{font-size:.85rem;color:var(--mut)}
+#main{flex:1;min-height:0;display:flex}
+#stage{flex:1;min-width:0;padding:10px;overflow:auto}
+#grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;align-content:start}
+.tile{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;cursor:pointer;border:1px solid var(--bd)}
+.tile video{width:100%;height:100%;object-fit:contain;background:#000}
+.mirror #localTile:not(.screen) video{transform:scaleX(-1)}
+.tile.pin{grid-column:1/-1}
+.tile.pin video{max-height:62vh}
+.tile .lbl{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.65);color:#fff;padding:2px 8px;border-radius:8px;font-size:.85rem;display:flex;gap:6px}
+.nonames .tile .n{display:none}
+.tile .off{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#1c2028;font-size:2.8rem;font-weight:700;color:#8b93a1}
+.tile.camoff .off{display:flex}
+.muted::after{content:"🔇"}
+#side{width:350px;max-width:42vw;border-left:1px solid var(--bd);background:var(--panel);display:flex;flex-direction:column;min-height:0}
+#tabs{display:flex;border-bottom:1px solid var(--bd)}
+#tabs button{flex:1;border:0;border-radius:0;background:transparent;padding:12px 4px;color:var(--mut)}
+#tabs button.on{color:var(--tx);box-shadow:inset 0 -2px var(--ac)}
+.pane{flex:1;min-height:0;display:none;flex-direction:column}
+.pane.on{display:flex}
+#msgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.msg{background:var(--panel2);padding:7px 11px;border-radius:12px;max-width:90%;overflow-wrap:anywhere}
+.msg.me{align-self:flex-end;background:var(--me)}
+.msg small{display:block;color:var(--mut);font-size:.78rem}
+.sys{align-self:center;color:var(--mut);font-size:.8rem;text-align:center}
+.send{display:flex;gap:8px;padding:10px;border-top:1px solid var(--bd)}
+#files,#people{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.file{background:var(--panel2);border-radius:12px;padding:10px 12px;overflow-wrap:anywhere}
+.file a{color:var(--ac)}
+.bar{height:4px;background:var(--bd);border-radius:2px;margin-top:6px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:var(--ac)}
+.person{background:var(--panel2);border-radius:12px;padding:10px 12px}
+.person .h{display:flex;align-items:center;gap:8px}
+.person .h .nm{flex:1;overflow-wrap:anywhere}
+.person .acts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.person .acts .rm{color:var(--red)}
+#codeTools{display:flex;gap:8px;padding:10px;border-bottom:1px solid var(--bd)}
+#codeTools select{width:auto;flex:1}
+#codeTools{flex-wrap:wrap}
+#codeTools button{padding:5px 9px;font-size:.85rem}
+#monacoBox{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;color:var(--mut);font-size:.9rem}
+#codeStatusBar{display:flex;align-items:center;gap:8px;padding:4px 10px;border-top:1px solid var(--bd);font-size:.78rem;color:var(--mut);background:var(--panel2)}
+#codeStatus{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#side.wide{width:68vw;max-width:none}
+.rcur{border-left:2px solid var(--c);margin-left:-1px}
+.helplink{display:block;text-align:center;margin-top:14px;color:var(--ac);font-size:.9rem;text-decoration:none}
+#codeBody{flex:1;min-height:0;display:flex}
+#monacoBox{min-width:0}
+#explorer{width:224px;flex:none;border-right:1px solid var(--bd);display:flex;flex-direction:column;background:var(--panel2);min-height:0}
+#exHead{display:flex;align-items:center;gap:2px;padding:6px 8px;border-bottom:1px solid var(--bd);font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--mut)}
+#exHead .sp{flex:1}
+#exHead button{border:0;background:transparent;padding:3px 5px;font-size:.9rem;border-radius:6px}
+#exNote{font-size:.74rem;color:var(--mut);padding:6px 10px;border-bottom:1px solid var(--bd)}
+#exTree{flex:1;overflow:auto;padding:4px 0;font-size:.88rem}
+.exrow{display:flex;align-items:center;gap:6px;padding:3px 8px;cursor:pointer;white-space:nowrap;user-select:none}
+.exrow:hover,.exrow.sel{background:var(--panel)}
+.exrow.open .nm{color:var(--ac)}
+.exrow .nm{flex:1;overflow:hidden;text-overflow:ellipsis}
+.exrow .ac{display:none;gap:2px}
+.exrow:hover .ac,.exrow.sel .ac{display:flex}
+.exrow .ac button{border:0;background:transparent;padding:0 3px;font-size:.8rem}
+.exroot .nm{font-weight:600}
+.mut{color:var(--mut)}
+.exempty{padding:10px 12px;color:var(--mut);font-size:.82rem;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.exempty p{margin:0}
+#exFoot{border-top:1px solid var(--bd);padding:6px;display:flex;flex-direction:column;gap:4px}
+#etabs{display:flex;overflow-x:auto;border-bottom:1px solid var(--bd);background:var(--panel2)}
+.etab{display:flex;align-items:center;gap:6px;padding:6px 10px;cursor:pointer;white-space:nowrap;font-size:.82rem;color:var(--mut);border-right:1px solid var(--bd)}
+.etab.on{color:var(--tx);background:var(--panel);box-shadow:inset 0 -2px var(--ac)}
+.etab .x{opacity:.6;padding:0 2px}.etab .x:hover{opacity:1}
+.etab .dot{width:8px;height:8px;border-radius:50%;background:var(--ac);display:none}
+.etab.dirty .dot{display:inline-block}
+#filesBtn.on{background:var(--ac);border-color:var(--ac);color:#fff}
+#editor{flex:1;width:100%;resize:none;border:0;outline:0;background:var(--ed);color:var(--edtx);padding:12px;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;tab-size:2;white-space:pre;overflow:auto}
+#bar{display:flex;justify-content:center;gap:10px;padding:12px;border-top:1px solid var(--bd);flex-wrap:wrap;background:var(--panel)}
+#bar button{min-width:96px}
+#bar button.offbtn{background:var(--offbg);border-color:var(--offbd);color:var(--offtx)}
+#bar button.sharing{background:var(--ok);border-color:var(--ok);color:#fff}
+#bar .leave{background:var(--red);border-color:var(--red);color:#fff}
+#toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:#000d;color:#fff;padding:8px 14px;border-radius:10px;font-size:.85rem;display:none;z-index:50;max-width:90vw;text-align:center}
+
+/* settings modal */
+#modal{position:fixed;inset:0;background:var(--overlay);display:flex;align-items:center;justify-content:center;padding:12px;z-index:40}
+#sbox{background:var(--panel);border:1px solid var(--bd);border-radius:16px;width:100%;max-width:560px;max-height:92vh;display:flex;flex-direction:column}
+#sbox header{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--bd)}
+#sbox header h2{margin:0;font-size:1.15rem;flex:1}
+#stabs{display:flex;gap:4px;padding:8px 12px 0;overflow-x:auto;border-bottom:1px solid var(--bd)}
+#stabs button{border:0;background:transparent;border-radius:8px 8px 0 0;padding:8px 12px;color:var(--mut);white-space:nowrap}
+#stabs button.on{color:var(--tx);box-shadow:inset 0 -2px var(--ac)}
+#sbody{overflow:auto;padding:6px 16px 16px}
+.sp-pane{display:none}.sp-pane.on{display:block}
+.set{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--bd)}
+.set:last-child{border-bottom:0}
+.set .l{flex:1}.set .l small{display:block;color:var(--mut);font-size:.8rem}
+.set .c{width:55%;display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap}
+.set .c.auto{width:auto}
+.seg{display:flex;border:1px solid var(--bd);border-radius:10px;overflow:hidden;width:100%}
+.seg button{flex:1;border:0;border-radius:0;background:transparent;padding:8px 6px}
+.seg button.on{background:var(--ac);color:#fff}
+.sw{width:26px;height:26px;border-radius:50%;padding:0;border:2px solid transparent}
+.sw.on{border-color:var(--tx)}
+.note{color:var(--mut);font-size:.82rem;padding:10px 0}
+@media(max-width:760px){#side.wide{height:88%;width:100%}#main{flex-direction:column}#side{width:100%;max-width:none;height:46%;border-left:0;border-top:1px solid var(--bd)}#grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}.set{flex-wrap:wrap}.set .c{width:100%}.set .c.auto{width:auto}}
+</style>
+</head>
+<body>
+
+<div id="lobby">
+  <div id="hnav">
+    <img class="logo" src="logo.png" alt="" width="28" height="28"><b>MeetRoom</b>
+    <button class="tab on" data-v="vHome">Home</button>
+    <button class="tab" data-v="vFeatures">Features</button>
+    <a class="tab" href="tutorial.html" target="_blank" rel="noopener">Tutorial</a>
+    <button class="tab" data-v="vFeedback">Feedback</button>
+    <span class="sp"></span>
+    <button id="lobbyGear" class="sm" title="Settings">⚙ Settings</button>
+  </div>
+
+  <div class="view on" id="vHome">
+    <div class="hero">
+      <div>
+        <img src="logo.png" alt="MeetRoom logo" width="72" height="72" style="border-radius:18px;margin-bottom:14px;display:block">
+        <h1>Meet, chat, share and code together</h1>
+        <p class="lead">Video calls with up to 10 people, screen sharing, file sharing and a live code editor. No accounts, no installs. Just a room code.</p>
+        <div class="chips"><span>🎥 Video &amp; screen share</span><span>💬 Chat &amp; files</span><span>👨‍💻 Live code editor</span><span>🛡 Host controls</span></div>
+      </div>
+      <div class="card" style="max-width:none">
+        <h2>Start or join a meeting</h2>
+        <input id="nameIn" placeholder="Your name" maxlength="24">
+        <div class="row"><button class="pri" id="createBtn" style="flex:1">Start meeting</button></div>
+        <div class="or">or join with a code</div>
+        <div class="row"><input id="codeIn" placeholder="CODE" maxlength="6"><button id="joinBtn">Join</button></div>
+        <div id="lobbyMsg"></div>
+      </div>
+    </div>
+    <div class="feat">
+      <div class="f"><b>1. Start a meeting</b><span>Click Start meeting to get a 6-character room code and an invite link.</span></div>
+      <div class="f"><b>2. Invite people</b><span>Send the link or code. They type a name and join in seconds.</span></div>
+      <div class="f"><b>3. Talk and build</b><span>Call, chat, send files and edit code together in the same room.</span></div>
+    </div>
+    <div class="card" style="max-width:none;margin-top:28px">
+      <h2>Themes</h2>
+      <p class="sub">Pick a look for the app and a different one for meetings if you like. Your choice is saved in this browser.</p>
+      <div class="thlabel">Interface theme<small>Home page, menus and settings</small></div>
+      <div class="throw" id="thIface"></div>
+      <div class="thlabel">Meeting theme<small>Video room, chat and code editor</small></div>
+      <div class="throw" id="thMeet"></div>
+    </div>
+  </div>
+
+  <div class="view" id="vFeatures">
+    <h2 class="vt">Features</h2>
+    <p class="sub">Everything runs in the browser, and people connect directly to each other.</p>
+    <div class="feat">
+      <div class="f"><b>🎥 Video and audio</b><span>See and hear everyone. Mute yourself and turn your camera on or off any time.</span></div>
+      <div class="f"><b>🖥 Screen sharing</b><span>Share your screen, a window or a browser tab with one click.</span></div>
+      <div class="f"><b>💬 Chat</b><span>Text chat for the whole room, with join and leave notices.</span></div>
+      <div class="f"><b>📎 File sharing</b><span>Send files up to 2 GB to people in the room. They accept first, and nothing is stored.</span></div>
+      <div class="f"><b>👨‍💻 Live code editor</b><span>The editor behind VS Code, shared live with colored cursors, error underlines and formatting.</span></div>
+      <div class="f"><b>🛡 Host controls</b><span>The room creator can mute people, stop video, remove and ban, and limit what guests can turn on.</span></div>
+      <div class="f"><b>🎨 Light and dark</b><span>System, light or dark theme, accent colors and text sizes.</span></div>
+      <div class="f"><b>⚙ Settings</b><span>Choose microphone, camera and speaker, video quality, and editor options.</span></div>
+      <div class="f"><b>🔒 Private by design</b><span>Calls go directly between browsers over encrypted connections. No recordings, no history.</span></div>
+    </div>
+  </div>
+
+  <div class="view" id="vFeedback">
+    <div class="card" style="max-width:560px;margin:0 auto">
+      <h2 class="vt">Send feedback</h2>
+      <p class="sub">Found a bug or have an idea? Tell us. Your message is emailed straight to the site owner.</p>
+      <form id="fbForm">
+        <label for="fbType">What kind of feedback?</label>
+        <select id="fbType"><option>Idea</option><option>Bug</option><option>Praise</option><option>Other</option></select>
+        <label>How would you rate MeetRoom?</label>
+        <div id="fbStars"></div>
+        <label for="fbMsg">Your feedback</label>
+        <textarea id="fbMsg" maxlength="2000" required placeholder="What happened, or what would you like to see?"></textarea>
+        <label for="fbName">Your name (optional)</label>
+        <input id="fbName" maxlength="60" autocomplete="name">
+        <label for="fbEmail">Your email (optional, only if you want a reply)</label>
+        <input id="fbEmail" type="email" maxlength="120" autocomplete="email">
+        <input id="fbHp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px">
+        <button class="pri" id="fbSend" style="margin-top:16px;width:100%">Send feedback</button>
+        <div id="fbStatus" role="status"></div>
+        <div class="fine">Please do not include passwords or private information. Feedback is delivered by email through the FormSubmit service.</div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="room" class="hidden">
+  <div id="top">
+    <img class="logo" src="logo.png" alt="" width="26" height="26"><b id="roomCode"></b><span id="hostBadge" class="badge hidden">Host</span>
+    <button id="copyBtn" class="sm">Copy invite link</button>
+    <span class="sp"></span>
+    <span class="pill" id="count"></span>
+    <button id="helpBtn" class="sm" title="Open the tutorial">?</button>
+    <button id="themeBtn" class="sm" title="Change meeting theme">🌓</button>
+    <button id="gearBtn" class="sm" title="Settings">⚙</button>
+  </div>
+  <div id="main">
+    <div id="stage"><div id="grid"></div></div>
+    <div id="side">
+      <div id="tabs">
+        <button data-p="chatP" class="on">Chat</button>
+        <button data-p="peopleP">People</button>
+        <button data-p="codeP">Code</button>
+        <button data-p="filesP">Files</button>
+      </div>
+      <div class="pane on" id="chatP">
+        <div id="msgs"></div>
+        <form class="send" id="chatForm"><input id="chatIn" placeholder="Message" autocomplete="off"><button class="pri">Send</button></form>
+      </div>
+      <div class="pane" id="peopleP">
+        <div id="people"></div>
+      </div>
+      <div class="pane" id="codeP">
+        <div id="codeTools">
+          <button id="filesBtn" title="Browse files on this computer">📁 Files</button>
+          <select id="lang">
+            <option value="txt">Plain text</option><option value="js">JavaScript</option><option value="ts">TypeScript</option>
+            <option value="py">Python</option><option value="html">HTML</option><option value="css">CSS</option>
+            <option value="json">JSON</option><option value="md">Markdown</option><option value="java">Java</option>
+            <option value="cpp">C++</option><option value="go">Go</option><option value="rs">Rust</option><option value="sql">SQL</option>
+          </select>
+          <button id="fmtBtn" title="Format with Prettier (Shift+Alt+F or Ctrl+S)">Format</button><button id="saveBtn" class="hidden" title="Save to your computer (Ctrl+S)">Save</button><button id="cmdBtn" title="Command palette (F1)">Commands</button>
+          <button id="copyCode">Copy</button><button id="dlCode">Download</button><button id="wideBtn" title="Make the editor wider">Expand</button>
+        </div>
+        <div id="etabs" class="hidden"></div>
+        <div id="codeBody">
+          <div id="explorer" class="hidden">
+            <div id="exHead"><span>Explorer</span><span class="sp"></span>
+              <button id="exOpen" title="Open a folder from this computer">📂</button>
+              <button id="exNewFile" title="New file">📄</button>
+              <button id="exNewDir" title="New folder">📁</button>
+              <button id="exRefresh" title="Refresh">⟳</button></div>
+            <div id="exNote">Files here stay on this computer. They are never shared with the room.</div>
+            <div id="exTree"></div>
+            <div id="exFoot"><button id="exSend" class="sm" title="Replace the shared document with the open file">Send file to live doc</button><button id="exSaveLive" class="sm" title="Save the shared document as a file in your folder">Save live doc to folder</button></div>
+          </div>
+          <div id="monacoBox">Open this tab to load the editor…</div>
+          <textarea id="editor" class="hidden" spellcheck="false" placeholder="Everyone in the room edits this together..."></textarea>
+        </div>
+        <div id="codeStatusBar"><span id="codeStatus">Shared code</span><button id="nextProb" class="sm" title="Jump to next problem (F8)">Next problem</button></div>
+      </div>
+      <div class="pane" id="filesP">
+        <div id="files"><div class="sys">Offer a file (up to 2 GB). Each person chooses whether to accept it, and it goes straight to them. Keep this tab open until it finishes.</div></div>
+        <div class="send"><input type="file" id="fileIn" style="padding:7px"></div>
+      </div>
+    </div>
+  </div>
+  <div id="bar">
+    <button id="micBtn">🎤 Mute</button>
+    <button id="camBtn">📷 Stop video</button>
+    <button id="shareBtn">🖥 Share screen</button>
+    <button id="leaveBtn" class="leave">Leave</button>
+  </div>
+</div>
+
+<div id="modal" class="hidden">
+  <div id="sbox" role="dialog" aria-label="Settings">
+    <header><h2>Settings</h2><button id="sClose" class="sm">Close</button></header>
+    <div id="stabs">
+      <button data-s="sGeneral" class="on">General</button>
+      <button data-s="sAV">Audio &amp; video</button>
+      <button data-s="sEditor">Chat &amp; editor</button>
+      <button data-s="sHost" id="hostTab" class="hidden">Host controls</button>
+    </div>
+    <div id="sbody">
+      <div class="sp-pane on" id="sGeneral">
+        <div class="set"><div class="l">Display name</div><div class="c"><input id="setName" maxlength="24"></div></div>
+        <div class="note">Themes are on the Home tab of the start page. During a meeting, the 🌓 button in the top bar switches the meeting theme.</div>
+        <div class="set"><div class="l">Accent color</div><div class="c auto" id="swatches"></div></div>
+        <div class="set"><div class="l">Text size</div>
+          <div class="c"><div class="seg" id="segSize"><button data-v="s">Small</button><button data-v="m">Medium</button><button data-v="l">Large</button></div></div></div>
+        <div class="set"><div class="l">Show names on video tiles</div><div class="c auto"><input type="checkbox" id="setNames"></div></div>
+        <div class="set"><div class="l">Mirror my video<small>Only affects how you see yourself.</small></div><div class="c auto"><input type="checkbox" id="setMirror"></div></div>
+        <div class="set"><div class="l">Hide my own tile</div><div class="c auto"><input type="checkbox" id="setHideSelf"></div></div>
+        <div class="set"><div class="l">Sounds<small>Beep when someone joins, leaves or messages.</small></div><div class="c auto"><input type="checkbox" id="setSounds"></div></div>
+        <div class="set"><div class="l">Reset all settings</div><div class="c auto"><button id="resetBtn" class="sm">Reset</button></div></div>
+      </div>
+      <div class="sp-pane" id="sAV">
+        <div class="set inroom"><div class="l">Microphone</div><div class="c"><select id="selMic"></select></div></div>
+        <div class="set inroom"><div class="l">Camera</div><div class="c"><select id="selCam"></select></div></div>
+        <div class="set inroom"><div class="l">Speaker<small>Not supported in every browser.</small></div><div class="c"><select id="selSpk"></select></div></div>
+        <div class="set"><div class="l">Video quality<small>Lower it if calls stutter.</small></div>
+          <div class="c"><div class="seg" id="segQuality"><button data-v="low">Low</button><button data-v="med">Medium</button><button data-v="high">High</button></div></div></div>
+        <div class="set"><div class="l">Echo cancellation</div><div class="c auto"><input type="checkbox" id="setEC"></div></div>
+        <div class="set"><div class="l">Noise suppression</div><div class="c auto"><input type="checkbox" id="setNS"></div></div>
+        <div class="set"><div class="l">Auto gain control</div><div class="c auto"><input type="checkbox" id="setAGC"></div></div>
+        <div class="note" id="avNote">Device pickers appear once you are in a room.</div>
+      </div>
+      <div class="sp-pane" id="sEditor">
+        <div class="set"><div class="l">Editor font size <span id="edFontVal"></span></div><div class="c"><input type="range" id="setEdFont" min="11" max="22"></div></div>
+        <div class="set"><div class="l">Tab width</div><div class="c"><div class="seg" id="segTab"><button data-v="2">2</button><button data-v="4">4</button><button data-v="8">8</button></div></div></div>
+        <div class="set"><div class="l">Wrap long lines</div><div class="c auto"><input type="checkbox" id="setWrap"></div></div>
+        <div class="set"><div class="l">Check code for errors<small>Underlines syntax problems as you type.</small></div><div class="c auto"><input type="checkbox" id="setLint"></div></div>
+        <div class="set"><div class="l">Line numbers</div><div class="c auto"><input type="checkbox" id="setLineNums"></div></div>
+        <div class="set"><div class="l">Minimap<small>Small overview on the right. Best with Expand.</small></div><div class="c auto"><input type="checkbox" id="setMinimap"></div></div>
+        <div class="set"><div class="l">Format on save<small>Ctrl+S (⌘S) formats the document with Prettier.</small></div><div class="c auto"><input type="checkbox" id="setFormatSave"></div></div>
+        <div class="set"><div class="l">Format as I type<small>Tidies indentation after you type ; or }.</small></div><div class="c auto"><input type="checkbox" id="setFormatType"></div></div>
+        <div class="set"><div class="l">Auto-close HTML tags<small>Typing &gt; adds the closing tag; typing &lt;/ completes it.</small></div><div class="c auto"><input type="checkbox" id="setAutoTags"></div></div>
+        <div class="set"><div class="l">Snippets and Tab expansion<small>Type div or ul&gt;li*3 then Tab.</small></div><div class="c auto"><input type="checkbox" id="setSnippets"></div></div>
+        <div class="set"><div class="l">Suggest when I open a bracket</div><div class="c auto"><input type="checkbox" id="setSuggestBr"></div></div>
+        <div class="set"><div class="l">Complete missing brackets when formatting<small>Adds missing ) ] } or closing tags so Format can finish.</small></div><div class="c auto"><input type="checkbox" id="setFixBr"></div></div>
+      </div>
+      <div class="sp-pane" id="sHost">
+        <div class="note">You created this room, so you are the host. Controls apply to people who joined with your code.</div>
+        <div class="set"><div class="l">Participants can unmute themselves</div><div class="c auto"><input type="checkbox" id="polMic" checked></div></div>
+        <div class="set"><div class="l">Participants can turn on video / share screen</div><div class="c auto"><input type="checkbox" id="polCam" checked></div></div>
+        <div class="set"><div class="l">Mute everyone</div><div class="c auto"><button id="muteAll" class="sm">Mute all</button></div></div>
+        <div class="set"><div class="l">Turn off everyone's video</div><div class="c auto"><button id="camAll" class="sm">Stop all video</button></div></div>
+        <div class="set"><div class="l">Banned people<small>Bans follow the browser they used, not just the room slot.</small></div></div>
+        <div id="banList"></div>
+        <div class="note">Mute, stop video, remove and ban for individuals are in the People tab. These limits are enforced by each person's browser, so they stop normal users but are not tamper-proof.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script type="module">
+import * as Y from 'https://cdn.jsdelivr.net/npm/yjs@13.6.18/+esm';
+
+/* ---------- configuration ---------- */
+const MAX = 10;                      // 1 host + 9 guests
+const GUEST_SLOTS = MAX - 1;
+const PREFIX = 'meetroom1';          // change to something unique to your deployment
+// Optional TURN for strict firewalls:
+// const PEER_OPTIONS = { config: { iceServers: [ {urls:'stun:stun.l.google.com:19302'}, {urls:'turn:YOUR_HOST:3478', username:'u', credential:'p'} ] } };
+const PEER_OPTIONS = {};
+const FEEDBACK_EMAIL = 'roshansreddy2013@gmail.com';   // feedback from the Feedback tab is emailed here
+const MAX_FILE = 2 * 1024 * 1024 * 1024;   // 2 GB
+const CHUNK = 16 * 1024;
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const rid = (n, a = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789') => Array.from({length:n}, () => a[Math.floor(Math.random()*a.length)]).join('');
+const fmt = n => n < 1024 ? n + ' B' : n < 1048576 ? (n/1024).toFixed(0) + ' KB' : (n/1048576).toFixed(1) + ' MB';
+const toU8 = x => x instanceof Uint8Array ? x : new Uint8Array(x.buffer ? x.buffer : x);
+const toAB = u => u.buffer.slice(u.byteOffset, u.byteOffset + u.byteLength);
+const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+function toast(t){const e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',3200)}
+
+/* ---------- settings ---------- */
+let monaco = null, mon = null, monModel = null, monLoading = false, applyingRemote = false, sharedLang = 'txt';
+const THEMES = {
+  midnight: {name:'Midnight', dark:true,  bg:'#0f1115', panel:'#181b22', panel2:'#20242d', tx:'#eceef2'},
+  daylight: {name:'Daylight', dark:false, bg:'#f3f4f7', panel:'#ffffff', panel2:'#eef0f4', tx:'#16181d'},
+  sunset:   {name:'Sunset',   dark:true,  bg:'#1a1218', panel:'#251a22', panel2:'#31232d', tx:'#f5ebe6'}
+};
+const DEFAULTS = {name:'', theme:'system', mtheme:'same', accent:'#4c8dff', size:'m', showNames:true, mirror:true, hideSelf:false, sounds:true,
+  quality:'med', ec:true, ns:true, agc:true, micId:'', camId:'', spkId:'', edFont:13, tab:'2', wrap:false, lint:true, lineNums:true, minimap:false, formatOnSave:true, formatOnType:true, autoTags:true, snippets:true, suggestBrackets:true, completeBrackets:true};
+let S = Object.assign({}, DEFAULTS);
+try { Object.assign(S, JSON.parse(lsGet('mr_settings') || '{}')); } catch (e) {}
+if (S.theme === 'light') S.theme = 'daylight'; if (S.theme === 'dark') S.theme = 'midnight';   // older saved settings
+const saveS = () => lsSet('mr_settings', JSON.stringify(S));
+const ACCENTS = ['#4c8dff', '#8b5cf6', '#22a06b', '#f08c00', '#e5487f', '#14a3b8'];
+const Q = {low:{w:320,h:180,f:15}, med:{w:640,h:360,f:24}, high:{w:1280,h:720,f:30}};
+const vcon = () => Object.assign({width:{ideal:Q[S.quality].w}, height:{ideal:Q[S.quality].h}, frameRate:{ideal:Q[S.quality].f}}, S.camId ? {deviceId:{ideal:S.camId}} : {});
+const acon = () => Object.assign({echoCancellation:S.ec, noiseSuppression:S.ns, autoGainControl:S.agc}, S.micId ? {deviceId:{ideal:S.micId}} : {});
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+mq.addEventListener && mq.addEventListener('change', applySettings);
+
+function curThemes() {
+  const it = S.theme === 'system' ? (mq.matches ? 'midnight' : 'daylight') : (THEMES[S.theme] ? S.theme : 'midnight');
+  return {it, mt: THEMES[S.mtheme] ? S.mtheme : it};
+}
+function applySettings() {
+  const {it, mt} = curThemes(), theme = THEMES[mt].dark ? 'dark' : 'light';
+  const r = document.documentElement;
+  r.setAttribute('data-theme', it);
+  const rm = $('room'); if (rm) rm.setAttribute('data-theme', mt);
+  r.style.setProperty('--ac', S.accent);
+  r.style.fontSize = {s:'13.5px', m:'15px', l:'17px'}[S.size] || '15px';
+  document.body.classList.toggle('nonames', !S.showNames);
+  document.body.classList.toggle('mirror', !!S.mirror);
+  const lt = $('localTile'); if (lt) lt.style.display = S.hideSelf ? 'none' : '';
+  const ed = $('editor');
+  ed.style.fontSize = S.edFont + 'px'; ed.style.tabSize = S.tab; ed.style.whiteSpace = S.wrap ? 'pre-wrap' : 'pre';
+  document.querySelectorAll('video').forEach(v => { if (S.spkId && v.setSinkId) v.setSinkId(S.spkId).catch(() => {}); });
+  if (mon) {
+    mon.updateOptions({fontSize: S.edFont, tabSize: +S.tab, wordWrap: S.wrap ? 'on' : 'off', minimap: {enabled: !!S.minimap}, lineNumbers: S.lineNums ? 'on' : 'off', formatOnType: !!S.formatOnType});
+    monaco.editor.setTheme(theme === 'dark' ? 'vs-dark' : 'vs');
+    applyDiag(); runChecks();
+  }
+}
+applySettings();
+
+/* sounds */
+let actx = null;
+function beep(f = 660, d = .12) {
+  if (!S.sounds) return;
+  try { actx = actx || new AudioContext(); const o = actx.createOscillator(), g = actx.createGain();
+    o.frequency.value = f; g.gain.value = .06; o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime + d); } catch (e) {}
+}
+
+/* ---------- state ---------- */
+let peer = null, mySlot = -2, code = '', myName = '', isHost = false;
+const peers = {};   // id -> {slot,isHost,name,mic,cam,hello,conn,connInit,call,stream,tile}
+let outAudio, outVideo, camTrack = null, hasMic = false, hasCam = false, screenTrack = null, localStream, dummyStop = [];
+let micOn = true, camOn = true;
+let policy = {allowMic: true, allowCam: true};
+const myCid = (() => { let c = lsGet('mr_cid'); if (!c) { c = rid(20, 'abcdefghijklmnopqrstuvwxyz0123456789'); lsSet('mr_cid', c); } return c; })();
+let bans = {};                 // host only: cid -> name
+let bannedSet = new Set();     // everyone: cids the host has banned
+
+/* ---------- shared doc (Yjs) ---------- */
+const doc = new Y.Doc();
+const ytext = doc.getText('code');
+const ymeta = doc.getMap('meta');
+doc.on('update', (u, origin) => { if (origin !== 'remote') broadcast({t:'y', u: toAB(u)}); });
+
+const ta = $('editor');
+ta.addEventListener('input', () => {
+  const nv = ta.value, ov = ytext.toString();
+  let s = 0; const m = Math.min(ov.length, nv.length);
+  while (s < m && ov[s] === nv[s]) s++;
+  let eo = ov.length, en = nv.length;
+  while (eo > s && en > s && ov[eo-1] === nv[en-1]) { eo--; en--; }
+  doc.transact(() => { if (eo > s) ytext.delete(s, eo - s); if (en > s) ytext.insert(s, nv.slice(s, en)); }, 'local');
+});
+ta.addEventListener('keydown', e => {
+  if (e.key === 'Tab') { e.preventDefault(); ta.setRangeText(' '.repeat(+S.tab), ta.selectionStart, ta.selectionEnd, 'end'); ta.dispatchEvent(new Event('input')); }
+});
+ytext.observe((ev, tr) => {
+  if (tr.origin === 'local') return;
+  if (monModel) { applyRemoteToMonaco(ev); return; }
+  const tp = p => { let o = 0, np = p;
+    for (const d of ev.delta) {
+      if (d.retain) o += d.retain;
+      else if (d.insert) { if (o <= p) np += d.insert.length; }
+      else if (d.delete) { if (o < p) np -= Math.min(d.delete, p - o); o += d.delete; }
+    } return np; };
+  const s = tp(ta.selectionStart), e = tp(ta.selectionEnd), top = ta.scrollTop;
+  ta.value = ytext.toString();
+  if (document.activeElement === ta) ta.setSelectionRange(s, e);
+  ta.scrollTop = top;
+});
+ymeta.observe(() => { const l = ymeta.get('lang'); if (l) { sharedLang = l; if (!mon || isLive()) $('lang').value = l; } setLang(); });
+$('lang').onchange = () => ymeta.set('lang', $('lang').value);
+$('copyCode').onclick = () => navigator.clipboard.writeText(ytext.toString()).then(() => toast('Code copied'));
+$('dlCode').onclick = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([ytext.toString()], {type:'text/plain'}));
+  a.download = 'shared.' + ($('lang').value || 'txt'); a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+};
+
+
+/* ---------- Monaco editor (VS Code's editor) ---------- */
+const LANGMAP = {txt:'plaintext', js:'javascript', ts:'typescript', py:'python', html:'html', css:'css', json:'json', md:'markdown', java:'java', cpp:'cpp', go:'go', rs:'rust', sql:'sql'};
+const BASIC_LANGS = new Set(['py', 'java', 'cpp', 'go', 'rs', 'sql']);   // no built-in checker, so MeetRoom adds a basic one
+const CUR_COLORS = ['#e5484d', '#f08c00', '#30a46c', '#14a3b8', '#8b5cf6', '#e5487f', '#99a21d', '#4c8dff'];
+(() => { const st = document.createElement('style'); st.textContent = CUR_COLORS.map((c, i) => `.rcur-${i}{--c:${c}}.rsel-${i}{background:${c}40}`).join(''); document.head.appendChild(st); })();
+
+function loadMonaco() {
+  if (mon || monLoading) return; monLoading = true;
+  const base = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.0/min';
+  $('monacoBox').textContent = 'Loading editor…';
+  self.MonacoEnvironment = { getWorkerUrl: () => 'data:text/javascript;charset=utf-8,' + encodeURIComponent(`self.MonacoEnvironment={baseUrl:'${base}/'};importScripts('${base}/vs/base/worker/workerMain.js');`) };
+  const sc = document.createElement('script'); sc.src = base + '/vs/loader.js';
+  sc.onload = () => { try { window.require.config({paths: {vs: base + '/vs'}}); window.require(['vs/editor/editor.main'], () => { monaco = window.monaco; initMonaco(); }, monFail); } catch (e) { monFail(); } };
+  sc.onerror = monFail; document.head.appendChild(sc);
+  setTimeout(() => { if (!mon) monFail(); }, 25000);
+}
+function monFail() {
+  if (mon) return; monLoading = false;
+  $('monacoBox').classList.add('hidden'); $('editor').classList.remove('hidden');
+  $('editor').value = ytext.toString(); $('codeStatus').textContent = 'Basic editor (the full editor could not be loaded)';
+  $('filesBtn').classList.add('hidden'); toast('Could not load the full code editor. Using the basic one.');
+}
+function applyDiag() {
+  const ts = monaco.languages.typescript, off = !S.lint;
+  ts.javascriptDefaults.setDiagnosticsOptions({noSemanticValidation: true, noSyntaxValidation: off});
+  ts.typescriptDefaults.setDiagnosticsOptions({noSemanticValidation: off, noSyntaxValidation: off});
+  monaco.languages.json.jsonDefaults.setDiagnosticsOptions({validate: !off, allowComments: false});
+  monaco.languages.css.cssDefaults.setOptions({validate: !off});
+}
+function initMonaco() {
+  const box = $('monacoBox'); box.textContent = ''; box.style.display = 'block';
+  const ts = monaco.languages.typescript;
+  ts.javascriptDefaults.setCompilerOptions({target: ts.ScriptTarget.ES2020, allowNonTsExtensions: true});
+  ts.typescriptDefaults.setCompilerOptions({target: ts.ScriptTarget.ES2020, allowNonTsExtensions: true});
+  applyDiag();
+  const dark = THEMES[curThemes().mt].dark;
+  mon = monaco.editor.create(box, {
+    value: ytext.toString(), language: LANGMAP[sharedLang] || 'plaintext', theme: dark ? 'vs-dark' : 'vs',
+    automaticLayout: true, fontSize: S.edFont, tabSize: +S.tab, insertSpaces: true, wordWrap: S.wrap ? 'on' : 'off',
+    minimap: {enabled: !!S.minimap}, lineNumbers: S.lineNums ? 'on' : 'off', bracketPairColorization: {enabled: true},
+    guides: {indentation: true, bracketPairs: true}, scrollBeyondLastLine: false, renderWhitespace: 'selection',
+    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace', padding: {top: 8}, smoothScrolling: true, 'semanticHighlighting.enabled': false,
+    autoClosingBrackets: 'always', autoClosingQuotes: 'always', autoClosingOvertype: 'always', autoSurround: 'languageDefined', autoIndent: 'full',
+    formatOnType: !!S.formatOnType, tabCompletion: 'on', snippetSuggestions: 'top', quickSuggestions: {other: true, comments: false, strings: true},
+    wordBasedSuggestions: 'allDocuments', parameterHints: {enabled: true}, linkedEditing: true, acceptSuggestionOnEnter: 'on',
+    suggest: {showSnippets: true, showWords: true, preview: true}
+  });
+  monModel = mon.getModel(); monModel.setEOL(monaco.editor.EndOfLineSequence.LF);
+  monModel.onDidChangeContent(e => {
+    if (applyingRemote) return;
+    const ch = [...e.changes].sort((a, b) => b.rangeOffset - a.rangeOffset);   // apply from the end so offsets stay valid
+    doc.transact(() => { for (const c of ch) { if (c.rangeLength) ytext.delete(c.rangeOffset, c.rangeLength); if (c.text) ytext.insert(c.rangeOffset, c.text); } }, 'local');
+    scheduleChecks();
+  });
+  let curT = null;
+  mon.onDidChangeCursorSelection(e => {
+    clearTimeout(curT);
+    curT = setTimeout(() => { if (!monModel || mon.getModel() !== monModel) return; broadcast({t:'cur', a: monModel.getOffsetAt(e.selection.getStartPosition()), b: monModel.getOffsetAt(e.selection.getEndPosition())}); }, 80);
+    status();
+  });
+  monaco.editor.onDidChangeMarkers(status);
+  setLang(); runChecks(); status();
+  setupEditorTools();
+  Object.values(peers).forEach(drawCursor);
+}
+function setLang() {
+  if (!monModel) return;
+  monaco.editor.setModelLanguage(monModel, LANGMAP[sharedLang] || 'plaintext'); runChecks();
+}
+function applyRemoteToMonaco(ev) {
+  const edits = []; let pos = 0;
+  for (const d of ev.delta) {
+    if (d.retain) pos += d.retain;
+    else if (typeof d.insert === 'string') { const a = monModel.getPositionAt(pos); edits.push({range: new monaco.Range(a.lineNumber, a.column, a.lineNumber, a.column), text: d.insert}); }
+    else if (d.delete) { const a = monModel.getPositionAt(pos), b = monModel.getPositionAt(pos + d.delete); edits.push({range: new monaco.Range(a.lineNumber, a.column, b.lineNumber, b.column), text: ''}); pos += d.delete; }
+  }
+  applyingRemote = true; try { monModel.applyEdits(edits); } finally { applyingRemote = false; }
+  scheduleChecks(); Object.values(peers).forEach(drawCursor);
+}
+function drawCursor(p) {
+  if (!monModel || !p || !p.cur) return;
+  const n = monModel.getValueLength(), A = monModel.getPositionAt(Math.min(p.cur.a, n)), B = monModel.getPositionAt(Math.min(p.cur.b, n));
+  const k = (p.slot + 1) % CUR_COLORS.length, list = [];
+  if (p.cur.a !== p.cur.b) list.push({range: new monaco.Range(A.lineNumber, A.column, B.lineNumber, B.column), options: {className: 'rsel-' + k}});
+  list.push({range: new monaco.Range(B.lineNumber, B.column, B.lineNumber, B.column), options: {className: 'rcur rcur-' + k, hoverMessage: {value: p.name}, stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges}});
+  p.decoIds = monModel.deltaDecorations(p.decoIds || [], list);
+}
+let chkT = null;
+function scheduleChecks() { clearTimeout(chkT); chkT = setTimeout(runChecks, 400); }
+function runChecks() {
+  if (!mon || !curModel()) return;
+  const l = $('lang').value || 'txt'; let ms = [];
+  if (S.lint && BASIC_LANGS.has(l)) { try { ms = basicCheck(curModel().getValue(), l); } catch (e) {} }
+  monaco.editor.setModelMarkers(curModel(), 'meetroom', ms.map(m => {
+    const a = curModel().getPositionAt(m.o), b = curModel().getPositionAt(m.o + Math.max(1, m.len));
+    return {startLineNumber: a.lineNumber, startColumn: a.column, endLineNumber: b.lineNumber, endColumn: b.column, message: m.msg, source: 'MeetRoom check',
+      severity: m.sev === 'e' ? monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning};
+  }));
+  status();
+}
+function status() {
+  if (!mon || !curModel()) return;
+  const p = mon.getPosition() || {lineNumber: 1, column: 1}, mk = monaco.editor.getModelMarkers({resource: curModel().uri});
+  const e = mk.filter(x => x.severity === monaco.MarkerSeverity.Error).length, w = mk.filter(x => x.severity === monaco.MarkerSeverity.Warning).length;
+  const lf = activeFile();
+  $('codeStatus').textContent = (lf ? lf.name + (lf.dirty ? ' ●' : '') + '  ·  ' : '') + `Ln ${p.lineNumber}, Col ${p.column}  ·  ${e} error${e === 1 ? '' : 's'}, ${w} warning${w === 1 ? '' : 's'}  ·  Spaces: ${S.tab}`;
+}
+/* Basic checker for languages Monaco has no built-in checker for: brackets, strings, comments, and a few Python rules. */
+function basicCheck(text, l) {
+  const out = [], n = text.length, stack = [], pairs = {')': '(', ']': '[', '}': '{'};
+  const line = l === 'py' ? '#' : l === 'sql' ? '--' : '//', block = l !== 'py', tq = l === 'py';
+  let i = 0;
+  while (i < n) {
+    const ch = text[i];
+    if (text.startsWith(line, i)) { while (i < n && text[i] !== '\n') i++; continue; }
+    if (block && text.startsWith('/*', i)) { const e = text.indexOf('*/', i + 2); if (e < 0) { out.push({o: i, len: 2, msg: 'Unclosed comment', sev: 'e'}); break; } i = e + 2; continue; }
+    if (tq && (text.startsWith('"""', i) || text.startsWith("'''", i))) { const q = text.substr(i, 3), e = text.indexOf(q, i + 3); if (e < 0) { out.push({o: i, len: 3, msg: 'Unclosed triple-quoted string', sev: 'e'}); break; } i = e + 3; continue; }
+    if (ch === '"' || ch === "'" || (ch === '`' && l === 'go')) {
+      if (l === 'rs' && ch === "'") { i++; continue; }            // Rust lifetimes look like quotes
+      let j = i + 1;
+      while (j < n && text[j] !== ch && (ch === '`' || text[j] !== '\n')) { if (text[j] === '\\' && ch !== '`') j++; j++; }
+      if (j >= n || text[j] !== ch) { out.push({o: i, len: 1, msg: 'Unclosed string', sev: 'e'}); i = Math.min(j, n); continue; }
+      i = j + 1; continue;
+    }
+    if ('([{'.includes(ch)) stack.push({ch, o: i});
+    else if (')]}'.includes(ch)) {
+      const t = stack.pop();
+      if (!t) out.push({o: i, len: 1, msg: `Unexpected '${ch}'`, sev: 'e'});
+      else if (t.ch !== pairs[ch]) out.push({o: i, len: 1, msg: `Mismatched '${ch}' (the open '${t.ch}' needs its own closing bracket)`, sev: 'e'});
+    }
+    i++;
+  }
+  stack.forEach(t => out.push({o: t.o, len: 1, msg: `Unclosed '${t.ch}'`, sev: 'e'}));
+  if (l === 'py') {
+    const lines = text.split('\n'); let off = 0, depth = 0, inTQ = false;
+    const kw = /^\s*(?:async\s+)?(?:if|elif|else|for|while|def|class|try|except|finally|with)\b/;
+    for (const ln of lines) {
+      const strip = ln.replace(/(["'])(?:\\.|(?!\1).)*\1/g, '""').replace(/#.*$/, '');
+      const tqCount = (ln.match(/"""|'''/g) || []).length;
+      if (!inTQ && depth <= 0) {
+        if (/^\t+ +|^ +\t/.test(ln)) out.push({o: off, len: Math.max(1, ln.length - ln.trimStart().length), msg: 'Mixed tabs and spaces in indentation', sev: 'w'});
+        if (/^\s*print\s+[^(=\s]/.test(ln)) out.push({o: off + ln.indexOf('print'), len: 5, msg: 'print is a function in Python 3. Use print(...)', sev: 'w'});
+        const t = strip.trimEnd();
+        if (kw.test(strip) && !/:\s*$/.test(t) && !t.endsWith('\\') && !t.includes(':') && !/[(\[{,]\s*$/.test(t))
+          out.push({o: off + (ln.length - ln.trimStart().length), len: Math.max(1, ln.trim().length), msg: "Missing ':' at the end of this line", sev: 'e'});
+      }
+      if (tqCount % 2 === 1) inTQ = !inTQ;
+      if (!inTQ) for (const c of strip) { if ('([{'.includes(c)) depth++; else if (')]}'.includes(c)) depth--; }
+      off += ln.length + 1;
+    }
+  }
+  return out;
+}
+
+/* ---------- editor tools: Prettier formatting, Tab expansion (Emmet-style), snippets, auto-close tags ---------- */
+const PRETTIER_BASE = 'https://cdn.jsdelivr.net/npm/prettier@3.3.3';
+const PARSERS = {js: 'babel', ts: 'typescript', json: 'json', css: 'css', html: 'html', md: 'markdown'};
+const PLUGIN_NEEDS = {js: ['babel', 'estree'], ts: ['typescript', 'estree'], json: ['babel', 'estree'], css: ['postcss'], html: ['html', 'babel', 'estree', 'postcss'], md: ['markdown']};
+const scriptLoads = {};
+function loadScript(src) {
+  if (!scriptLoads[src]) scriptLoads[src] = new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = src; s.onload = res;
+    s.onerror = () => { delete scriptLoads[src]; rej(new Error('Could not load Prettier. Check your connection.')); };
+    document.head.appendChild(s);
+  });
+  return scriptLoads[src];
+}
+async function prettierFormat(text, lang) {
+  await loadScript(PRETTIER_BASE + '/standalone.js');
+  for (const p of PLUGIN_NEEDS[lang]) await loadScript(`${PRETTIER_BASE}/plugins/${p}.js`);
+  const plugins = Object.values(window.prettierPlugins || {});
+  return window.prettier.format(text, {parser: PARSERS[lang], plugins, tabWidth: +S.tab, useTabs: false, printWidth: 80, endOfLine: 'auto'});
+}
+function applyFormatted(src, out) {
+  const model = curModel();
+  let s = 0; const m = Math.min(src.length, out.length);
+  while (s < m && src[s] === out[s]) s++;
+  let a = src.length, b = out.length;
+  while (a > s && b > s && src[a - 1] === out[b - 1]) { a--; b--; }
+  const p1 = model.getPositionAt(s), p2 = model.getPositionAt(a);
+  mon.pushUndoStop();
+  mon.executeEdits('prettier', [{range: new monaco.Range(p1.lineNumber, p1.column, p2.lineNumber, p2.column), text: out.slice(s, b)}]);
+  mon.pushUndoStop();
+}
+
+/* Completing missing brackets and tags. It only adds closers, never removes anything, and one Undo reverts it. */
+const BR_CFG = {
+  js: {line: '//', block: true, bt: true}, ts: {line: '//', block: true, bt: true}, json: {}, css: {block: true},
+  py: {line: '#', tq: true}, java: {line: '//', block: true}, cpp: {line: '//', block: true}, go: {line: '//', block: true, bt: true},
+  rs: {line: '//', block: true, rs: true}, sql: {line: '--', block: true}
+};
+function scanBrackets(text, lang, useIndent) {
+  const cfg = BR_CFG[lang]; if (!cfg) return null;
+  const n = text.length, pairs = {')': '(', ']': '[', '}': '{'}, stack = [], unclosed = [];
+  const lineStarts = [0]; for (let k = 0; k < n; k++) if (text[k] === '\n') lineStarts.push(k + 1);
+  const lineOf = o => { let lo = 0, hi = lineStarts.length - 1; while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (lineStarts[mid] <= o) lo = mid; else hi = mid - 1; } return lo; };
+  const indentOfLine = li => { const s = lineStarts[li]; let e = s; while (e < n && (text[e] === ' ' || text[e] === '\t')) e++; return e - s; };
+  let i = 0;
+  while (i < n) {
+    const ch = text[i];
+    if (cfg.line && text.startsWith(cfg.line, i)) { while (i < n && text[i] !== '\n') i++; continue; }
+    if (cfg.block && text.startsWith('/*', i)) { const e = text.indexOf('*/', i + 2); i = e < 0 ? n : e + 2; continue; }
+    if (cfg.tq && (text.startsWith('"""', i) || text.startsWith("'''", i))) { const q = text.substr(i, 3), e = text.indexOf(q, i + 3); i = e < 0 ? n : e + 3; continue; }
+    if (ch === '"' || ch === "'" || (ch === '`' && cfg.bt)) {
+      if (cfg.rs && ch === "'") { i++; continue; }
+      let j = i + 1;
+      while (j < n && text[j] !== ch && (ch === '`' || text[j] !== '\n')) { if (text[j] === '\\' && ch !== '`') j++; j++; }
+      i = (j < n && text[j] === ch) ? j + 1 : Math.min(j, n); if (i <= 0) i = 1; continue;
+    }
+    if ('([{'.includes(ch)) { const li = lineOf(i); stack.push({ch, o: i, line: li, indent: indentOfLine(li)}); }
+    else if (')]}'.includes(ch)) {
+      if (useIndent && /^\s*$/.test(text.slice(lineStarts[lineOf(i)], i))) {
+        const ind = indentOfLine(lineOf(i));
+        // a closer that starts its line and is less indented than the newest opener means that opener was never closed
+        while (stack.length > 1) {
+          const top = stack[stack.length - 1]; if (top.indent <= ind) break;
+          let ok = false; for (let q = stack.length - 2; q >= 0; q--) if (stack[q].ch === pairs[ch] && stack[q].indent <= ind) { ok = true; break; }
+          if (!ok) break; unclosed.push(Object.assign({}, stack.pop(), {at: null}));
+        }
+      }
+      let k = stack.length - 1; while (k >= 0 && stack[k].ch !== pairs[ch]) k--;
+      if (k >= 0) { while (stack.length - 1 > k) unclosed.push(Object.assign({}, stack.pop(), {at: i})); stack.pop(); }
+    }
+    i++;
+  }
+  while (stack.length) unclosed.push(Object.assign({}, stack.pop(), {at: null}));
+  return {unclosed, lineStarts, indentOfLine};
+}
+function completeBrackets(text0, lang) {
+  const crlf = text0.includes('\r\n'), text = crlf ? text0.replace(/\r\n/g, '\n') : text0;
+  const plain = scanBrackets(text, lang, false);
+  if (!plain || !plain.unclosed.length) return {text: text0, added: 0};
+  const sc = scanBrackets(text, lang, true), CLOSE = {'(': ')', '[': ']', '{': '}'};
+  const lines = text.split('\n'), per = {};
+  const lineEnd = li => sc.lineStarts[li] + lines[li].length;
+  const add = (pos, str) => { per[pos] = (per[pos] || '') + str; };
+  let lastNB = 0; for (let k = lines.length - 1; k >= 0; k--) if (lines[k].trim()) { lastNB = k; break; }
+  for (const op of sc.unclosed) {                       // innermost first, so closers come out in the right order
+    const closer = CLOSE[op.ch];
+    if (op.at !== null) { add(op.at, closer); continue; }
+    const block = op.ch === '{' && lang !== 'py', indentStr = lines[op.line].match(/^\s*/)[0];
+    let k = -1;
+    for (let li = op.line + 1; li < lines.length; li++) {
+      if (!lines[li].trim()) continue;
+      if (sc.indentOfLine(li) <= op.indent && !/^\s*[)\]}.,]/.test(lines[li])) { k = li; break; }
+    }
+    if (k >= 0) {
+      if (block) add(sc.lineStarts[k], indentStr + closer + '\n');
+      else { let p = k - 1; while (p > op.line && !lines[p].trim()) p--; add(lineEnd(p), closer); }
+    } else add(lineEnd(Math.max(lastNB, op.line)), block ? '\n' + indentStr + closer : closer);
+  }
+  let out = text;
+  Object.keys(per).map(Number).sort((a, b) => b - a).forEach(pos => { out = out.slice(0, pos) + per[pos] + out.slice(pos); });
+  return {text: crlf ? out.replace(/\n/g, '\r\n') : out, added: sc.unclosed.length};
+}
+const OPT_END = new Set(['p', 'li', 'dt', 'dd', 'tr', 'td', 'th', 'thead', 'tbody', 'tfoot', 'option', 'optgroup', 'html', 'head', 'body', 'colgroup']);
+function completeTags(text) {
+  let out = text, added = 0;
+  if (/<[A-Za-z][^<>]*$/.test(out.replace(/\s+$/, ''))) { out = out.replace(/\s+$/, '') + '>'; added++; }
+  const clean = out.replace(/<(script|style)\b[\s\S]*?<\/\1\s*>/gi, '').replace(/<!--[\s\S]*?-->/g, '');
+  const re = /<(\/?)([A-Za-z][\w:-]*)(?:\s(?:[^<>"']|"[^"]*"|'[^']*')*)?>/g, stack = []; let m;
+  while ((m = re.exec(clean))) {
+    const n = m[2], low = n.toLowerCase(); if (VOID.has(low) || m[0].endsWith('/>')) continue;
+    if (m[1]) { const k = stack.map(x => x.toLowerCase()).lastIndexOf(low); if (k >= 0) stack.length = k; } else stack.push(n);
+  }
+  const need = stack.filter(n => !OPT_END.has(n.toLowerCase())).reverse();
+  if (need.length) { out = out.replace(/\s+$/, '') + '\n' + need.map(n => '</' + n + '>').join('\n') + '\n'; added += need.length; }
+  return {text: out, added};
+}
+function repairCode(text, lang) { return lang === 'html' ? completeTags(text) : completeBrackets(text, lang); }
+
+let formatting = false;
+async function formatWithPrettier(model, lang, src) {          // true = handled, false = use the built-in formatter
+  const note = fx => `Added ${fx.added} missing ${lang === 'html' ? 'tag' : 'bracket'}${fx.added === 1 ? '' : 's'}`;
+  try {
+    const out = await prettierFormat(src, lang);
+    if (model.getValue() !== src) { toast('The code changed while formatting. Try again.'); return true; }
+    if (out !== src) applyFormatted(src, out); else toast('Already formatted.');
+    return true;
+  } catch (e) {
+    const msg = String(e && e.message || e).split('\n')[0].slice(0, 120);
+    if (/Could not load/.test(msg)) { toast(msg + ' Using the built-in formatter.'); return false; }
+    const fx = S.completeBrackets ? repairCode(src, lang) : {added: 0, text: src};
+    if (!fx.added) { toast('Cannot format: ' + msg); return true; }
+    try {
+      const out2 = await prettierFormat(fx.text, lang);
+      if (model.getValue() !== src) { toast('The code changed while formatting. Try again.'); return true; }
+      applyFormatted(src, out2); toast(note(fx) + ' and formatted.');
+    } catch (e2) {
+      if (model.getValue() === src) applyFormatted(src, fx.text);
+      toast(note(fx) + ', but the code still has an error: ' + String(e2 && e2.message || e2).split('\n')[0].slice(0, 100));
+    }
+    return true;
+  }
+}
+async function formatDoc() {
+  if (!mon || formatting) return;
+  const model = curModel(), lang = $('lang').value || 'txt', src = model.getValue();
+  if (PARSERS[lang]) {
+    formatting = true;
+    try { if (await formatWithPrettier(model, lang, src)) return; } finally { formatting = false; }
+  }
+  let msg = '';
+  if (S.completeBrackets) {
+    const fx = repairCode(src, lang);
+    if (fx.added) { applyFormatted(src, fx.text); msg = `Added ${fx.added} missing ${lang === 'html' ? 'tag' : 'bracket'}${fx.added === 1 ? '' : 's'}. `; }
+  }
+  const a = mon.getAction('editor.action.formatDocument');
+  if (a && a.isSupported()) { a.run(); if (msg) toast(msg.trim()); }
+  else { const t = mon.getAction('editor.action.trimTrailingWhitespace'); t && t.run(); toast(msg + 'No formatter for this language. Trimmed trailing spaces.'); }
+}
+
+/* Emmet-style abbreviations for HTML: div.card>h2+p*2 then Tab */
+const VOID = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
+const KNOWN = new Set(('a abbr address article aside audio b blockquote body br button canvas caption code col colgroup dd details div dl dt em fieldset figcaption figure footer form h1 h2 h3 h4 h5 h6 head header hr html i iframe img input label legend li link main mark meta nav ol optgroup option p pre section select small span strong style sub summary sup table tbody td template textarea tfoot th thead title tr ul video script').split(' '));
+const IMPLICIT = {ul: 'li', ol: 'li', table: 'tr', tbody: 'tr', thead: 'tr', tfoot: 'tr', tr: 'td', select: 'option', dl: 'dt'};
+const DEFAULT_ATTRS = {a: [['href', null]], img: [['src', null], ['alt', null]], input: [['type', 'text']], link: [['rel', 'stylesheet'], ['href', null]], form: [['action', null]]};
+const BOILERPLATE = '<!DOCTYPE html>\n<html lang="${1:en}">\n<head>\n\t<meta charset="UTF-8">\n\t<meta name="viewport" content="width=device-width, initial-scale=1.0">\n\t<title>${2:Document}</title>\n</head>\n<body>\n\t$0\n</body>\n</html>';
+function emmetParse(src) {
+  let i = 0;
+  const root = {name: '', children: []};
+  const ident = () => { let s = ''; while (i < src.length && /[\w$-]/.test(src[i])) s += src[i++]; return s; };
+  const readNode = parent => {
+    let name = ''; while (i < src.length && /[A-Za-z0-9:-]/.test(src[i]) && !(name === '' && /[0-9-]/.test(src[i]))) name += src[i++];
+    const n = {name, id: '', classes: [], attrs: [], text: '', mult: 1, children: [], parent};
+    for (;;) {
+      const c = src[i];
+      if (c === '#') { i++; n.id = ident(); }
+      else if (c === '.') { i++; n.classes.push(ident()); }
+      else if (c === '[') { const j = src.indexOf(']', i); if (j < 0) throw 0; const re = /([\w:@-]+)(?:=("[^"]*"|'[^']*'|[^\s\]]+))?/g; let m; const body = src.slice(i + 1, j); while ((m = re.exec(body))) n.attrs.push([m[1], m[2] === undefined ? null : m[2].replace(/^["']|["']$/g, '')]); i = j + 1; }
+      else if (c === '{') { const j = src.indexOf('}', i); if (j < 0) throw 0; n.text = src.slice(i + 1, j); i = j + 1; }
+      else if (c === '*') { i++; let d = ''; while (/\d/.test(src[i] || '')) d += src[i++]; n.mult = Math.min(+d || 1, 50); }
+      else break;
+    }
+    if (!n.name) { if (!n.id && !n.classes.length) throw 0; n.name = IMPLICIT[parent.name] || 'div'; }
+    else if (!KNOWN.has(n.name)) throw 0;
+    return n;
+  };
+  let parent = root, last = null;
+  while (i < src.length) {
+    const n = readNode(parent); parent.children.push(n); last = n;
+    if (i >= src.length) break;
+    const op = src[i++];
+    if (op === '>') parent = last; else if (op === '+') { /* sibling */ } else if (op === '^') parent = parent.parent || root; else throw 0;
+    if (i >= src.length) throw 0;
+  }
+  return root;
+}
+function emmetRender(nodes, depth, st, pk) {
+  const tabs = d => '\t'.repeat(d), out = [];
+  for (const n of nodes) for (let k = 1; k <= n.mult; k++) {
+    const idx = n.mult > 1 ? k : (pk || k);
+    const e = s => s.replace(/\$+/g, m => String(idx).padStart(m.length, '0')).replace(/[\\$}]/g, '\\$&');
+    let attrs = '';
+    if (n.id) attrs += ` id="${e(n.id)}"`;
+    if (n.classes.length) attrs += ` class="${n.classes.map(e).join(' ')}"`;
+    const given = n.attrs.slice(), have = new Set(given.map(a => a[0]));
+    (DEFAULT_ATTRS[n.name] || []).forEach(a => { if (!have.has(a[0])) given.push(a); });
+    for (const [an, av] of given) attrs += ` ${an}="${av === null ? '$' + (++st.n) : e(av)}"`;
+    if (VOID.has(n.name)) { out.push(`<${n.name}${attrs}>`); continue; }
+    let inner;
+    if (n.children.length) { const lead = '\n' + tabs(depth + 1); inner = lead + (n.text ? e(n.text) + lead : '') + emmetRender(n.children, depth + 1, st, idx) + '\n' + tabs(depth); }
+    else inner = n.text ? e(n.text) : '$' + (++st.n);
+    out.push(`<${n.name}${attrs}>${inner}</${n.name}>`);
+  }
+  return out.join('\n' + tabs(depth));
+}
+function emmetExpand(src) {
+  if (src === '!' || src === 'html:5' || src === 'html5') return BOILERPLATE;
+  if (!/^[A-Za-z.#\[{]/.test(src) || src.length > 200) return null;
+  try {
+    const tree = emmetParse(src), st = {n: 0};
+    let out = emmetRender(tree.children, 0, st);
+    if (st.n === 0 || st.n > 1) out += '$0'; else out = out.replace('$1', '$0');
+    return out;
+  } catch (e) { return null; }
+}
+
+/* Snippets for other languages: type the word at the start of a line, then Tab */
+const JS_SNIPS = {
+  log: 'console.log($1);$0', fn: 'function ${1:name}(${2:params}) {\n\t$0\n}', af: 'const ${1:name} = (${2:params}) => {\n\t$0\n};',
+  for: 'for (let ${1:i} = 0; ${1:i} < ${2:array}.length; ${1:i}++) {\n\t$0\n}', forof: 'for (const ${1:item} of ${2:items}) {\n\t$0\n}',
+  if: 'if (${1:condition}) {\n\t$0\n}', ife: 'if (${1:condition}) {\n\t$2\n} else {\n\t$0\n}', try: 'try {\n\t$1\n} catch (${2:error}) {\n\t$0\n}',
+  imp: "import ${1:name} from '${2:module}';$0", cls: 'class ${1:Name} {\n\tconstructor(${2:args}) {\n\t\t$0\n\t}\n}',
+  fetch: "const ${1:res} = await fetch('${2:url}');\nconst ${3:data} = await ${1:res}.json();$0", tm: 'setTimeout(() => {\n\t$0\n}, ${1:1000});'
+};
+const SNIPPETS = {
+  js: JS_SNIPS,
+  ts: Object.assign({}, JS_SNIPS, {interface: 'interface ${1:Name} {\n\t$0\n}', type: 'type ${1:Name} = $0;'}),
+  py: {def: 'def ${1:name}(${2:args}):\n\t${0:pass}', class: 'class ${1:Name}:\n\tdef __init__(self${2:, args}):\n\t\t${0:pass}', if: 'if ${1:condition}:\n\t$0',
+    ife: 'if ${1:condition}:\n\t$2\nelse:\n\t$0', for: 'for ${1:item} in ${2:items}:\n\t$0', while: 'while ${1:condition}:\n\t$0',
+    try: 'try:\n\t$1\nexcept ${2:Exception} as ${3:e}:\n\t$0', with: 'with ${1:open("file")} as ${2:f}:\n\t$0', main: 'if __name__ == "__main__":\n\t$0',
+    pr: 'print($1)$0', imp: 'import ${1:module}$0'},
+  java: {main: 'public static void main(String[] args) {\n\t$0\n}', sout: 'System.out.println($1);$0', class: 'public class ${1:Name} {\n\t$0\n}',
+    for: 'for (int ${1:i} = 0; ${1:i} < ${2:n}; ${1:i}++) {\n\t$0\n}', fore: 'for (${1:Type} ${2:item} : ${3:items}) {\n\t$0\n}',
+    if: 'if (${1:condition}) {\n\t$0\n}', try: 'try {\n\t$1\n} catch (${2:Exception} ${3:e}) {\n\t$0\n}'},
+  cpp: {main: 'int main() {\n\t$0\n\treturn 0;\n}', inc: '#include <${1:iostream}>$0', cout: 'std::cout << $1 << std::endl;$0',
+    for: 'for (int ${1:i} = 0; ${1:i} < ${2:n}; ${1:i}++) {\n\t$0\n}', if: 'if (${1:condition}) {\n\t$0\n}',
+    class: 'class ${1:Name} {\npublic:\n\t$0\n};', vec: 'std::vector<${1:int}> ${2:v};$0'},
+  go: {main: 'func main() {\n\t$0\n}', func: 'func ${1:name}(${2:args}) ${3:error} {\n\t$0\n}', for: 'for ${1:i} := 0; ${1:i} < ${2:n}; ${1:i}++ {\n\t$0\n}',
+    iferr: 'if err != nil {\n\t${1:return err}\n}$0', fmt: 'fmt.Println($1)$0', if: 'if ${1:condition} {\n\t$0\n}'},
+  rs: {main: 'fn main() {\n\t$0\n}', fn: 'fn ${1:name}(${2:args}) ${3:-> ()} {\n\t$0\n}', for: 'for ${1:item} in ${2:items} {\n\t$0\n}',
+    pl: 'println!("{}", $1);$0', match: 'match ${1:value} {\n\t${2:pattern} => $0,\n}'},
+  sql: {sel: 'SELECT ${1:*}\nFROM ${2:table}\nWHERE ${3:condition};$0', ins: 'INSERT INTO ${1:table} (${2:columns})\nVALUES (${3:values});$0',
+    upd: 'UPDATE ${1:table}\nSET ${2:column} = ${3:value}\nWHERE ${4:condition};$0', del: 'DELETE FROM ${1:table}\nWHERE ${2:condition};$0',
+    ct: 'CREATE TABLE ${1:name} (\n\tid INTEGER PRIMARY KEY,\n\t$0\n);'},
+  css: {flex: 'display: flex;\njustify-content: ${1:center};\nalign-items: ${2:center};$0', grid: 'display: grid;\ngrid-template-columns: ${1:repeat(3, 1fr)};\ngap: ${2:1rem};$0',
+    abs: 'position: absolute;\ntop: ${1:0};\nleft: ${2:0};$0', media: '@media (max-width: ${1:768px}) {\n\t$0\n}', trans: 'transition: ${1:all} ${2:0.3s} ${3:ease};$0'}
+};
+function findExpansion(lang, before) {
+  if (lang === 'html') {
+    if (/<[A-Za-z][^<>]*$/.test(before)) return null;           // inside a tag, not text
+    const m = /[^\s<]+$/.exec(before); if (!m) return null;
+    const run = m[0];
+    if (before.charAt(before.length - run.length - 1) === '<') return null;
+    const sn = emmetExpand(run); return sn ? {run, snippet: sn, len: run.length} : null;
+  }
+  const t = SNIPPETS[lang]; if (!t) return null;
+  const m = /^\s*([A-Za-z_]\w*)$/.exec(before);
+  if (!m || !Object.prototype.hasOwnProperty.call(t, m[1])) return null;
+  return {run: m[1], snippet: t[m[1]], len: m[1].length};
+}
+function expandAtCursor() {
+  if (!S.snippets || !mon) return false;
+  const pos = mon.getPosition(), lang = $('lang').value || 'txt';
+  const before = curModel().getValueInRange(new monaco.Range(pos.lineNumber, 1, pos.lineNumber, pos.column));
+  const hit = findExpansion(lang, before); if (!hit) return false;
+  const sc = mon.getContribution('snippetController2'); if (!sc || !sc.insert) return false;
+  sc.insert(hit.snippet, {overwriteBefore: hit.len}); return true;
+}
+
+/* Auto-close tags for HTML: typing > adds the closing tag, typing </ completes the name */
+function autoCloseTag() {
+  const pos = mon.getPosition(), line = curModel().getLineContent(pos.lineNumber);
+  const before = line.slice(0, pos.column - 1), after = line.slice(pos.column - 1);
+  const m = /<([A-Za-z][\w:-]*)(?:\s(?:[^<>"']|"[^"]*"|'[^']*')*)?>$/.exec(before);
+  if (!m || /\/>$/.test(before)) return;
+  const name = m[1]; if (VOID.has(name.toLowerCase()) || after.startsWith('</' + name)) return;
+  mon.executeEdits('autotag', [{range: new monaco.Range(pos.lineNumber, pos.column, pos.lineNumber, pos.column), text: '</' + name + '>'}], [new monaco.Selection(pos.lineNumber, pos.column, pos.lineNumber, pos.column)]);
+}
+function autoCompleteCloseName() {
+  const pos = mon.getPosition(), line = curModel().getLineContent(pos.lineNumber);
+  if (line.charAt(pos.column - 3) !== '<') return;
+  const text = curModel().getValueInRange(new monaco.Range(1, 1, pos.lineNumber, pos.column - 2)).replace(/<!--[\s\S]*?-->/g, '');
+  const re = /<(\/?)([A-Za-z][\w:-]*)(?:\s(?:[^<>"']|"[^"]*"|'[^']*')*)?>/g, stack = []; let m;
+  while ((m = re.exec(text))) {
+    const n = m[2]; if (VOID.has(n.toLowerCase()) || m[0].endsWith('/>')) continue;
+    if (m[1]) { const k = stack.lastIndexOf(n); if (k >= 0) stack.length = k; } else stack.push(n);
+  }
+  const name = stack[stack.length - 1]; if (!name) return;
+  mon.executeEdits('autotag', [{range: new monaco.Range(pos.lineNumber, pos.column, pos.lineNumber, pos.column), text: name + '>'}]);
+}
+
+function setupEditorTools() {
+  const K = monaco.KeyCode, M = monaco.KeyMod;
+  mon.addAction({id: 'meetroom.format', label: 'Format Document (Prettier)', keybindings: [M.Shift | M.Alt | K.KeyF], contextMenuGroupId: '1_modification', contextMenuOrder: 1.5, run: () => { formatDoc(); }});
+  mon.addAction({id: 'meetroom.save', label: 'Save (format document)', keybindings: [M.CtrlCmd | K.KeyS], run: () => { saveShortcut(); }});
+  mon.addCommand(K.Tab, () => { if (!expandAtCursor()) mon.trigger('keyboard', 'tab', null); },
+    'editorTextFocus && !editorReadonly && !editorHasSelection && !suggestWidgetVisible && !inSnippetMode && !editorTabMovesFocus');
+
+  const kind = monaco.languages.CompletionItemKind.Snippet, rule = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+  const plain = s => s.replace(/\$\{\d+(?::([^}]*))?\}|\$\d+/g, (m, d) => d || '').replace(/\\([\\$}])/g, '$1');
+  monaco.languages.registerCompletionItemProvider('html', {
+    provideCompletionItems(model, pos) {
+      if (!S.snippets) return {suggestions: []};
+      const before = model.getValueInRange({startLineNumber: pos.lineNumber, startColumn: 1, endLineNumber: pos.lineNumber, endColumn: pos.column});
+      const hit = findExpansion('html', before); if (!hit) return {suggestions: []};
+      return {suggestions: [{label: hit.run, kind, insertText: hit.snippet, insertTextRules: rule, detail: 'Expand abbreviation (Tab)',
+        documentation: {value: '```html\n' + plain(hit.snippet) + '\n```'}, sortText: '0', filterText: hit.run, preselect: true,
+        range: {startLineNumber: pos.lineNumber, startColumn: pos.column - hit.run.length, endLineNumber: pos.lineNumber, endColumn: pos.column}}]};
+    }
+  });
+  Object.keys(SNIPPETS).forEach(code => {
+    monaco.languages.registerCompletionItemProvider(LANGMAP[code], {
+      provideCompletionItems(model, pos) {
+        if (!S.snippets) return {suggestions: []};
+        const t = SNIPPETS[code], w = model.getWordUntilPosition(pos);
+        const range = {startLineNumber: pos.lineNumber, startColumn: w.startColumn, endLineNumber: pos.lineNumber, endColumn: w.endColumn};
+        return {suggestions: Object.keys(t).map(k => ({label: k, kind, insertText: t[k], insertTextRules: rule, detail: 'Snippet', documentation: {value: '```\n' + plain(t[k]) + '\n```'}, sortText: '0' + k, range}))};
+      }
+    });
+  });
+  mon.onDidType(txt => {
+    const lang = $('lang').value || 'txt';
+    if (S.autoTags && lang === 'html') { if (txt === '>') autoCloseTag(); else if (txt === '/') autoCompleteCloseName(); }
+    if (S.suggestBrackets && txt.length === 1 && '([{'.includes(txt)) setTimeout(() => { if (mon.hasTextFocus()) mon.trigger('meetroom', 'editor.action.triggerSuggest', {}); }, 40);
+  });
+  setupExplorer();
+}
+
+
+/* ---------- file explorer: files on THIS computer. Nothing here is ever synced to the room. ---------- */
+const MAX_OPEN = 2 * 1024 * 1024;
+const IGNORE = new Set(['node_modules', '.git']);
+const EXT_LANG = {js: 'js', mjs: 'js', cjs: 'js', jsx: 'js', ts: 'ts', tsx: 'ts', json: 'json', css: 'css', scss: 'css', html: 'html', htm: 'html', md: 'md',
+  py: 'py', java: 'java', c: 'cpp', cc: 'cpp', cpp: 'cpp', h: 'cpp', hpp: 'cpp', go: 'go', rs: 'rs', sql: 'sql', txt: 'txt'};
+const langFromName = n => (n.includes('.') && EXT_LANG[n.split('.').pop().toLowerCase()]) || 'txt';
+const validName = n => /^[^\\/:*?"<>|\x00-\x1f]{1,100}$/.test(n) && n !== '.' && n !== '..';
+
+let ws = null, selNode = null, explorerOn = false, lastDir = null, activeKey = 'live', tabOrder = [];
+const files = new Map(), viewStates = {};
+
+/* tiny IndexedDB store so the last opened folder can be offered again next time */
+const idb = {
+  open: () => new Promise((res, rej) => { const r = indexedDB.open('meetroom', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }),
+  async get(k) { try { const db = await this.open(); return await new Promise(res => { const q = db.transaction('kv').objectStore('kv').get(k); q.onsuccess = () => res(q.result); q.onerror = () => res(null); }); } catch (e) { return null; } },
+  async set(k, v) { try { const db = await this.open(); await new Promise(res => { const t = db.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = () => res(); t.onerror = () => res(); }); } catch (e) {} }
+};
+
+/* two back ends with the same shape: real folders (Chrome, Edge) or a private workspace kept in the browser */
+const diskBE = {
+  async list(node) { const out = []; for await (const [name, h] of node.native.entries()) out.push({name, kind: h.kind === 'directory' ? 'dir' : 'file', native: h}); return out; },
+  async read(node) {
+    const f = await node.native.getFile();
+    if (f.size > MAX_OPEN) throw new Error('This file is too large to edit here (over 2 MB).');
+    const t = await f.text(); if (t.includes('\u0000')) throw new Error('This looks like a binary file, so it cannot be opened.'); return t;
+  },
+  async write(node, text) { const w = await node.native.createWritable(); await w.write(text); await w.close(); },
+  async create(dirNode, name, kind) {
+    if (kind === 'dir') return dirNode.native.getDirectoryHandle(name, {create: true});
+    const h = await dirNode.native.getFileHandle(name, {create: true}); const w = await h.createWritable(); await w.write(''); await w.close(); return h;
+  },
+  async remove(node) { await node.parent.native.removeEntry(node.name, {recursive: true}); }
+};
+let vfs = null;
+function vfsLoad() {
+  try { vfs = JSON.parse(lsGet('mr_vfs') || 'null'); } catch (e) { vfs = null; }
+  if (!vfs || !vfs.tree) vfs = {tree: {type: 'dir', children: {}}};
+}
+function vfsSave() { try { localStorage.setItem('mr_vfs', JSON.stringify(vfs)); } catch (e) { toast('Browser storage is full.'); throw e; } }
+const vfsBE = {
+  async list(node) { return Object.entries(node.native.children).map(([name, v]) => ({name, kind: v.type === 'dir' ? 'dir' : 'file', native: v})); },
+  async read(node) { return node.native.content || ''; },
+  async write(node, text) { node.native.content = text; vfsSave(); },
+  async create(dirNode, name, kind) { const v = kind === 'dir' ? {type: 'dir', children: {}} : {type: 'file', content: ''}; dirNode.native.children[name] = v; vfsSave(); return v; },
+  async remove(node) { delete node.parent.native.children[node.name]; vfsSave(); }
+};
+
+function isLive() { return !!mon && mon.getModel() === monModel; }
+function curModel() { return mon.getModel(); }
+function activeFile() { return activeKey === 'live' ? null : (files.get(activeKey) || null); }
+
+/* ----- tabs ----- */
+function renderTabs() {
+  const box = $('etabs'); box.innerHTML = '';
+  const mk = (key, label, closable, dirty) => {
+    const t = document.createElement('div'); t.className = 'etab' + (key === activeKey ? ' on' : '') + (dirty ? ' dirty' : '');
+    const n = document.createElement('span'); n.textContent = label; t.appendChild(n);
+    const d = document.createElement('i'); d.className = 'dot'; t.appendChild(d);
+    if (closable) { const x = document.createElement('b'); x.className = 'x'; x.textContent = '×'; x.title = 'Close'; x.onclick = e => { e.stopPropagation(); closeTab(key); }; t.appendChild(x); }
+    t.onclick = () => showTab(key); box.appendChild(t);
+  };
+  mk('live', '👥 Live (shared)', false, false);
+  tabOrder.forEach(k => { const f = files.get(k); mk(k, f.name, true, f.dirty); });
+  box.classList.toggle('hidden', !tabOrder.length);
+  $('saveBtn').classList.toggle('hidden', activeKey === 'live');
+}
+function showTab(key) {
+  if (!mon) return;
+  try { viewStates[activeKey] = mon.saveViewState(); } catch (e) {}
+  activeKey = key;
+  if (key === 'live' || !files.has(key)) { activeKey = 'live'; mon.setModel(monModel); $('lang').value = sharedLang; }
+  else { const f = files.get(key); mon.setModel(f.model); $('lang').value = f.lang; }
+  if (viewStates[activeKey]) { try { mon.restoreViewState(viewStates[activeKey]); } catch (e) {} }
+  renderTabs(); renderTree(); runChecks(); status(); mon.focus();
+}
+function closeTab(key) {
+  const f = files.get(key); if (!f) return;
+  if (f.dirty && !confirm(`"${f.name}" has unsaved changes. Close without saving?`)) return;
+  const wasActive = activeKey === key;
+  tabOrder = tabOrder.filter(k => k !== key);
+  if (wasActive) showTab(tabOrder[tabOrder.length - 1] || 'live');
+  files.delete(key); delete viewStates[key]; f.model.dispose();
+  renderTabs(); renderTree();
+}
+async function openFileNode(node) {
+  const key = ws.kind + ':' + node.path;
+  if (files.has(key)) return showTab(key);
+  try {
+    const text = await ws.be.read(node), lang = langFromName(node.name);
+    const model = monaco.editor.createModel(text, LANGMAP[lang] || 'plaintext', monaco.Uri.parse('inmemory://meetroom/' + Date.now() + '/' + encodeURIComponent(node.path)));
+    const f = {key, name: node.name, node, be: ws.be, model, lang, savedVersion: model.getAlternativeVersionId(), dirty: false};
+    model.onDidChangeContent(() => { const d = model.getAlternativeVersionId() !== f.savedVersion; if (d !== f.dirty) { f.dirty = d; renderTabs(); } scheduleChecks(); });
+    files.set(key, f); tabOrder.push(key); showTab(key);
+  } catch (e) { toast(String(e && e.message || e)); }
+}
+async function saveActive() {
+  const f = activeFile(); if (!f) return;
+  try { await f.be.write(f.node, f.model.getValue()); f.savedVersion = f.model.getAlternativeVersionId(); f.dirty = false; renderTabs(); toast('Saved ' + f.name); }
+  catch (e) { toast('Could not save: ' + (e && e.message || e)); }
+}
+async function saveShortcut() {
+  if (isLive()) { if (S.formatOnSave) formatDoc(); else toast('Changes sync live. Use Download to keep a copy.'); return; }
+  if (S.formatOnSave) await formatDoc();
+  await saveActive();
+}
+
+/* ----- tree ----- */
+function mkNode(parent, e) { return {name: e.name, kind: e.kind, native: e.native, parent, children: null, expanded: false, path: (parent.path ? parent.path + '/' : '') + e.name}; }
+function sortKids(node) { node.children.sort((a, b) => a.kind === b.kind ? a.name.localeCompare(b.name) : (a.kind === 'dir' ? -1 : 1)); }
+async function loadChildren(node) {
+  const list = await ws.be.list(node);
+  node.children = list.filter(e => !(e.kind === 'dir' && IGNORE.has(e.name))).map(e => mkNode(node, e)); sortKids(node);
+}
+async function loadSafe(node) { try { await loadChildren(node); } catch (e) { toast('Could not read that folder: ' + (e && e.message || e)); node.children = node.children || []; } }
+async function refreshNode(node) {
+  const old = new Map((node.children || []).map(c => [c.name + '|' + c.kind, c]));
+  await loadChildren(node);
+  node.children = node.children.map(c => { const o = old.get(c.name + '|' + c.kind); if (o) { o.native = c.native; return o; } return c; });
+  for (const c of node.children) if (c.kind === 'dir' && c.expanded) await refreshNode(c);
+}
+function btnEl(text, title, fn, cls) { const b = document.createElement('button'); b.type = 'button'; b.textContent = text; b.title = title; if (cls) b.className = cls; b.onclick = e => { e.stopPropagation(); fn(); }; return b; }
+function treeRow(node, depth) {
+  const d = document.createElement('div');
+  d.className = 'exrow' + (selNode === node ? ' sel' : '') + (files.has(ws.kind + ':' + node.path) ? ' open' : '');
+  d.style.paddingLeft = (8 + depth * 14) + 'px';
+  const ic = document.createElement('span'); ic.textContent = node.kind === 'dir' ? (node.expanded ? '📂' : '📁') : '📄';
+  const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = node.name; nm.title = node.path;
+  const ac = document.createElement('span'); ac.className = 'ac';
+  if (node.kind === 'dir') { ac.appendChild(btnEl('📄', 'New file in this folder', () => createIn(node, 'file'))); ac.appendChild(btnEl('📁', 'New folder in this folder', () => createIn(node, 'dir'))); }
+  if (node.parent) ac.appendChild(btnEl('🗑', 'Delete', () => deleteNode(node)));
+  d.append(ic, nm, ac); d.onclick = () => clickNode(node); return d;
+}
+async function clickNode(node) {
+  selNode = node;
+  if (node.kind === 'dir') { node.expanded = !node.expanded || node === ws.root; if (node.expanded && !node.children) await loadSafe(node); renderTree(); }
+  else { renderTree(); openFileNode(node); }
+}
+function renderTree() {
+  const host = $('exTree'); if (!host) return; host.innerHTML = '';
+  const live = document.createElement('div'); live.className = 'exrow' + (activeKey === 'live' ? ' open' : '');
+  live.innerHTML = '<span>👥</span><span class="nm">Live document</span><small class="mut">shared</small>'; live.onclick = () => showTab('live'); host.appendChild(live);
+  if (!ws) {
+    const e = document.createElement('div'); e.className = 'exempty';
+    const p = document.createElement('p'); p.textContent = window.showDirectoryPicker ? 'Open a folder from your computer to browse and edit its files, and to make new folders and files.' : 'This browser cannot open folders on your computer, so you can use a private workspace kept inside the browser.';
+    e.appendChild(p);
+    const o = document.createElement('button'); o.className = 'pri sm'; o.textContent = window.showDirectoryPicker ? 'Open folder' : 'Open browser workspace'; o.onclick = openFolder; e.appendChild(o);
+    if (lastDir) { const r = document.createElement('button'); r.className = 'sm'; r.textContent = 'Reopen "' + lastDir.name + '"'; r.onclick = reopenLast; e.appendChild(r); }
+    host.appendChild(e); return;
+  }
+  const head = document.createElement('div'); head.className = 'exrow exroot' + (selNode === ws.root ? ' sel' : '');
+  const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = '📂 ' + ws.name; nm.title = ws.kind === 'disk' ? 'A folder on this computer' : 'Stored in this browser';
+  const ac = document.createElement('span'); ac.className = 'ac';
+  ac.appendChild(btnEl('📄', 'New file', () => createIn(ws.root, 'file'))); ac.appendChild(btnEl('📁', 'New folder', () => createIn(ws.root, 'dir')));
+  head.append(nm, ac); head.onclick = () => { selNode = ws.root; renderTree(); }; host.appendChild(head);
+  (function walk(node, depth) { for (const c of node.children || []) { host.appendChild(treeRow(c, depth)); if (c.kind === 'dir' && c.expanded && c.children) walk(c, depth + 1); } })(ws.root, 1);
+  if (!(ws.root.children || []).length) { const e = document.createElement('div'); e.className = 'exempty'; e.textContent = 'This folder is empty. Use 📄 or 📁 to add something.'; host.appendChild(e); }
+}
+
+/* ----- creating and deleting ----- */
+async function createPath(dirNode, parts, kind) {
+  let cur = dirNode, child = null;
+  for (let i = 0; i < parts.length; i++) {
+    const last = i === parts.length - 1, want = last ? kind : 'dir';
+    if (!cur.children) await loadChildren(cur);
+    child = cur.children.find(c => c.name.toLowerCase() === parts[i].toLowerCase());
+    if (child) { if (last || child.kind !== 'dir') throw new Error(`"${parts[i]}" already exists here.`); }
+    else {
+      const native = await ws.be.create(cur, parts[i], want);
+      child = mkNode(cur, {name: parts[i], kind: want, native}); if (want === 'dir') child.children = [];
+      cur.children.push(child); sortKids(cur);
+    }
+    cur.expanded = true; cur = child;
+  }
+  return child;
+}
+async function createIn(dirNode, kind) {
+  if (!ws) return openFolder();
+  const input = prompt(kind === 'dir' ? 'New folder name. Use / to make subfolders, for example src/utils' : 'New file name. Use / to put it in folders, for example src/app.js', '');
+  if (!input) return;
+  const parts = input.split('/').map(s => s.trim()).filter(Boolean);
+  if (!parts.length || parts.some(p => !validName(p))) return toast('That name is not allowed. Avoid \\ : * ? " < > | and names like . or ..');
+  try {
+    const node = await createPath(dirNode, parts, kind);
+    selNode = node; if (kind === 'dir') node.expanded = true;
+    renderTree(); if (kind === 'file') openFileNode(node);
+  } catch (e) { toast(String(e && e.message || e)); renderTree(); }
+}
+async function deleteNode(node) {
+  if (!confirm(`Delete ${node.kind === 'dir' ? 'the folder' : 'the file'} "${node.name}"${node.kind === 'dir' ? ' and everything inside it' : ''}? This cannot be undone.`)) return;
+  try {
+    await ws.be.remove(node);
+    for (const [k, f] of [...files]) if (f.node === node || f.node.path.startsWith(node.path + '/')) { f.dirty = false; closeTab(k); }
+    node.parent.children = (node.parent.children || []).filter(c => c !== node);
+    if (selNode === node) selNode = null; renderTree(); toast('Deleted ' + node.name);
+  } catch (e) { toast('Could not delete: ' + (e && e.message || e)); }
+}
+
+/* ----- opening a folder ----- */
+async function useWorkspace(kind, name, native) {
+  [...files.keys()].forEach(k => { files.get(k).dirty = false; closeTab(k); });
+  ws = {kind, name, be: kind === 'disk' ? diskBE : vfsBE, root: {name, kind: 'dir', native, parent: null, children: null, expanded: true, path: ''}};
+  selNode = ws.root; await loadSafe(ws.root); renderTree();
+}
+async function openFolder() {
+  if ([...files.values()].some(f => f.dirty) && !confirm('Opening another folder closes your open files. Unsaved changes will be lost. Continue?')) return;
+  if (window.showDirectoryPicker) {
+    try { const h = await window.showDirectoryPicker({mode: 'readwrite'}); lastDir = h; idb.set('lastDir', h); await useWorkspace('disk', h.name, h); }
+    catch (e) { if (e && e.name !== 'AbortError') toast('Could not open that folder. Try a project folder rather than a system folder.'); }
+  } else { vfsLoad(); await useWorkspace('browser', 'Browser workspace', vfs.tree); toast('Using a private workspace stored in this browser.'); }
+}
+async function reopenLast() {
+  const h = lastDir; if (!h) return;
+  try {
+    let perm = await h.queryPermission({mode: 'readwrite'}); if (perm !== 'granted') perm = await h.requestPermission({mode: 'readwrite'});
+    if (perm !== 'granted') return toast('Permission was not granted.');
+    await useWorkspace('disk', h.name, h);
+  } catch (e) { toast('Could not reopen that folder.'); }
+}
+
+/* ----- the only two ways local files and the live document meet, and both are your choice ----- */
+function sendToLive() {
+  const f = activeFile(); if (!f) return toast('Open a local file first, then send it.');
+  if (!confirm(`Replace the shared live document for everyone in the room with "${f.name}"?`)) return;
+  monModel.applyEdits([{range: monModel.getFullModelRange(), text: f.model.getValue()}]);
+  ymeta.set('lang', f.lang); toast('Sent to the live document.'); showTab('live');
+}
+async function saveLiveToFolder() {
+  if (!ws) return toast('Open a folder first.');
+  const dir = selNode && selNode.kind === 'dir' ? selNode : ((selNode && selNode.parent) || ws.root);
+  const input = prompt(`Save the live document as (inside "${dir.name}")`, 'live.' + sharedLang); if (!input) return;
+  const parts = input.split('/').map(s => s.trim()).filter(Boolean);
+  if (!parts.length || parts.some(p => !validName(p))) return toast('That name is not allowed.');
+  try { const node = await createPath(dir, parts, 'file'); await ws.be.write(node, monModel.getValue()); renderTree(); toast('Saved ' + node.name); }
+  catch (e) { toast(String(e && e.message || e)); }
+}
+
+function toggleExplorer(force) {
+  explorerOn = force === undefined ? !explorerOn : force;
+  $('explorer').classList.toggle('hidden', !explorerOn); $('filesBtn').classList.toggle('on', explorerOn);
+  if (explorerOn) { $('side').classList.add('wide'); $('wideBtn').textContent = 'Shrink'; renderTree(); }
+  if (mon) setTimeout(() => mon.layout(), 60);
+}
+$('filesBtn').onclick = () => toast('The editor is still loading…');
+
+function setupExplorer() {
+  $('filesBtn').onclick = () => toggleExplorer();
+  $('saveBtn').onclick = () => saveShortcut();
+  $('exOpen').onclick = openFolder;
+  $('exNewFile').onclick = () => createIn(selNode && selNode.kind === 'dir' ? selNode : ((selNode && selNode.parent) || (ws && ws.root)), 'file');
+  $('exNewDir').onclick = () => createIn(selNode && selNode.kind === 'dir' ? selNode : ((selNode && selNode.parent) || (ws && ws.root)), 'dir');
+  $('exRefresh').onclick = async () => { if (!ws) return; try { await refreshNode(ws.root); } catch (e) { toast('Could not refresh.'); } renderTree(); };
+  $('exSend').onclick = sendToLive; $('exSaveLive').onclick = saveLiveToFolder;
+  $('lang').onchange = () => {
+    const v = $('lang').value;
+    if (isLive()) { sharedLang = v; ymeta.set('lang', v); }
+    else { const f = activeFile(); if (f) { f.lang = v; monaco.editor.setModelLanguage(f.model, LANGMAP[v] || 'plaintext'); runChecks(); } }
+  };
+  $('copyCode').onclick = () => navigator.clipboard.writeText(curModel().getValue()).then(() => toast('Code copied'));
+  $('dlCode').onclick = () => {
+    const f = activeFile(), a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([curModel().getValue()], {type: 'text/plain'}));
+    a.download = f ? f.name : 'shared.' + ($('lang').value || 'txt'); a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  };
+  mon.addAction({id: 'meetroom.brackets', label: 'Complete Missing Brackets', run: () => {
+    const m = curModel(), lang = $('lang').value || 'txt', src = m.getValue(), fx = repairCode(src, lang);
+    if (fx.added) { applyFormatted(src, fx.text); toast(`Added ${fx.added} missing ${lang === 'html' ? 'tag' : 'bracket'}${fx.added === 1 ? '' : 's'}.`); } else toast('No missing brackets found.');
+  }});
+  window.addEventListener('beforeunload', e => { if ([...files.values()].some(f => f.dirty)) { e.preventDefault(); e.returnValue = ''; } });
+  idb.get('lastDir').then(h => { if (h && h.kind === 'directory') { lastDir = h; if (explorerOn) renderTree(); } });
+  renderTabs();
+}
+
+$('fmtBtn').onclick = () => formatDoc();
+$('cmdBtn').onclick = () => { if (!mon) return; mon.focus(); mon.trigger('meetroom', 'editor.action.quickCommand', null); };
+$('nextProb').onclick = () => { if (!mon) return; mon.focus(); mon.trigger('meetroom', 'editor.action.marker.next', null); };
+$('wideBtn').onclick = () => { const w = $('side').classList.toggle('wide'); $('wideBtn').textContent = w ? 'Shrink' : 'Expand'; if (mon) setTimeout(() => mon.layout(), 50); };
+$('helpBtn').onclick = () => window.open('tutorial.html', '_blank', 'noopener');
+
+
+/* ---------- theme pickers on the Home tab ---------- */
+function renderThemePickers() {
+  const build = (host, key, neutralVal, neutralLabel, neutralSub) => {
+    host.innerHTML = '';
+    [[neutralVal, neutralLabel, null], ...Object.entries(THEMES).map(([k, t]) => [k, t.name, t])].forEach(([val, label, t]) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'thm' + (S[key] === val ? ' on' : '');
+      if (t) { b.style.background = `linear-gradient(135deg, ${t.bg} 0 55%, ${t.panel2} 55% 100%)`; b.style.color = t.tx; }
+      const n = document.createElement('span'); n.textContent = label; b.appendChild(n);
+      const sm = document.createElement('small'); sm.textContent = t ? (t.dark ? 'Dark' : 'Light') : neutralSub; b.appendChild(sm);
+      b.onclick = () => { S[key] = val; saveS(); applySettings(); renderThemePickers(); };
+      host.appendChild(b);
+    });
+  };
+  build($('thIface'), 'theme', 'system', 'System', 'Follows your device');
+  build($('thMeet'), 'mtheme', 'same', 'Same as interface', 'Matches the interface');
+}
+renderThemePickers();
+
+/* ---------- home tabs & feedback ---------- */
+function showView(v) {
+  document.querySelectorAll('.view').forEach(x => x.classList.toggle('on', x.id === v));
+  document.querySelectorAll('#hnav .tab[data-v]').forEach(x => x.classList.toggle('on', x.dataset.v === v));
+  $('lobby').scrollTop = 0;
+}
+document.querySelectorAll('#hnav .tab[data-v]').forEach(b => b.onclick = () => showView(b.dataset.v));
+if (location.hash === '#feedback') showView('vFeedback');
+let fbRating = 0;
+(() => {
+  const box = $('fbStars');
+  for (let i = 1; i <= 5; i++) {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = '★'; b.setAttribute('aria-label', i + ' star' + (i > 1 ? 's' : ''));
+    b.onclick = () => { fbRating = (fbRating === i ? 0 : i); [...box.children].forEach((x, k) => x.classList.toggle('on', k < fbRating)); };
+    box.appendChild(b);
+  }
+})();
+function fbStatus(msg, cls, link) {
+  const el = $('fbStatus'); el.className = cls || ''; el.textContent = msg;
+  if (link) { el.append(' '); const a = document.createElement('a'); a.href = link.href; a.textContent = link.text; el.appendChild(a); }
+}
+$('fbForm').onsubmit = async e => {
+  e.preventDefault();
+  const msg = $('fbMsg').value.trim(); if (!msg || $('fbHp').value) return;
+  if (!FEEDBACK_EMAIL) return fbStatus('Feedback is not set up yet. The site owner still needs to add an email address in the page settings.', 'err');
+  if (Date.now() - (+lsGet('mr_fb_t') || 0) < 30000) return fbStatus('Please wait a few seconds before sending again.', 'err');
+  const type = $('fbType').value, name = $('fbName').value.trim(), email = $('fbEmail').value.trim();
+  const btn = $('fbSend'); btn.disabled = true; btn.textContent = 'Sending…'; fbStatus('');
+  try {
+    const r = await fetch('https://formsubmit.co/ajax/' + encodeURIComponent(FEEDBACK_EMAIL), {
+      method: 'POST', headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+      body: JSON.stringify({_subject: 'MeetRoom feedback: ' + type, _template: 'table', _captcha: 'false', type, rating: fbRating ? fbRating + ' / 5' : 'not rated', message: msg, name: name || '(not given)', email: email || '(not given)'})
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !(j.success === true || j.success === 'true')) throw new Error(j.message || 'Could not send');
+    lsSet('mr_fb_t', String(Date.now()));
+    $('fbMsg').value = ''; fbRating = 0; [...$('fbStars').children].forEach(x => x.classList.remove('on'));
+    fbStatus('Thank you! Your feedback was sent.', 'ok');
+  } catch (err) {
+    const body = `Type: ${type}\nRating: ${fbRating || 'not rated'}\nName: ${name}\nEmail: ${email}\n\n${msg}`;
+    fbStatus('Could not send automatically (' + (err.message || 'network error') + ').', 'err', {href: 'mailto:' + FEEDBACK_EMAIL + '?subject=' + encodeURIComponent('MeetRoom feedback: ' + type) + '&body=' + encodeURIComponent(body), text: 'Send it with your email app instead'});
+  } finally { btn.disabled = false; btn.textContent = 'Send feedback'; }
+};
+
+/* ---------- lobby ---------- */
+const hashCode = (location.hash || '').replace('#', '').toUpperCase();
+if (/^[A-Z0-9]{6}$/.test(hashCode)) $('codeIn').value = hashCode;
+$('nameIn').value = S.name || '';
+const pending = (() => { try { const m = sessionStorage.getItem('mr_msg'); sessionStorage.removeItem('mr_msg'); return m; } catch (e) { return ''; } })();
+const lobbyMsg = t => $('lobbyMsg').textContent = t || '';
+if (pending) lobbyMsg(pending);
+$('createBtn').onclick = () => start(rid(6), true);
+$('joinBtn').onclick = () => start($('codeIn').value.trim().toUpperCase(), false);
+$('codeIn').onkeydown = e => { if (e.key === 'Enter') $('joinBtn').click(); };
+
+const hostIdOf = c => `${PREFIX}-${c}-host`;
+const idOf = j => j === 'host' ? hostIdOf(code) : `${PREFIX}-${code}-${j}`;
+const slotOf = id => id.endsWith('-host') ? -1 : parseInt(id.split('-').pop(), 10);
+
+async function start(c, create) {
+  if (!/^[A-Z0-9]{4,6}$/.test(c)) return lobbyMsg('Enter a valid room code.');
+  myName = ($('nameIn').value || 'Guest ' + rid(2, '0123456789')).trim().slice(0, 24);
+  S.name = $('nameIn').value.trim().slice(0, 24); saveS();
+  lobbyMsg('Starting camera…');
+  await getMedia();
+  lobbyMsg('Connecting…');
+  try {
+    code = c;
+    let r = null;
+    if (create || lsGet('mr_host_' + c)) {
+      try { r = {p: await openPeer(hostIdOf(c)), i: -1}; isHost = true; lsSet('mr_host_' + c, '1'); }
+      catch (e) { if (create) throw e; }
+    }
+    if (!r) r = await claim(c, 0);
+    peer = r.p; mySlot = r.i;
+  } catch (e) {
+    stopLocal();
+    return lobbyMsg(e === 'full' ? 'This room is full (10 people).' : 'Could not reach the connection server (' + e + ').');
+  }
+  lobbyMsg('');
+  if (isHost) { try { bans = JSON.parse(lsGet('mr_bans_' + code) || '{}'); } catch (e) { bans = {}; } bannedSet = new Set(Object.keys(bans)); }
+  $('lobby').classList.add('hidden'); $('room').classList.remove('hidden');
+  $('roomCode').textContent = code;
+  $('hostBadge').classList.toggle('hidden', !isHost);
+  $('hostTab').classList.toggle('hidden', !isHost);
+  history.replaceState(null, '', '#' + code);
+  addLocalTile();
+  wirePeer();
+  updateCount(); renderPeople(); applySettings();
+  sys(isHost ? 'Room ' + code + ' created. Share the invite link. You are the host.' : 'You joined room ' + code + '.');
+  const targets = ['host']; for (let j = 0; j < GUEST_SLOTS; j++) targets.push(j);
+  for (const j of targets) { if ((j === 'host' && isHost) || j === mySlot) continue; connectTo(j); await sleep(60); }
+}
+function openPeer(id) {
+  return new Promise((res, rej) => {
+    const p = new Peer(id, PEER_OPTIONS); let done = false;
+    p.on('open', () => { done = true; res(p); });
+    p.on('error', e => { if (done) return; try { p.destroy(); } catch (x) {} rej(e.type || 'error'); });
+  });
+}
+async function claim(c, i) {
+  if (i >= GUEST_SLOTS) throw 'full';
+  try { return {p: await openPeer(`${PREFIX}-${c}-${i}`), i}; }
+  catch (e) { if (e === 'unavailable-id') return claim(c, i + 1); throw e; }
+}
+
+/* ---------- local media ---------- */
+async function getMedia() {
+  let s = null;
+  const gum = c => navigator.mediaDevices.getUserMedia(c);
+  try { s = await gum({audio: acon(), video: vcon()}); }
+  catch (e) { try { s = await gum({audio: acon()}); } catch (e2) { try { s = await gum({video: vcon()}); } catch (e3) {} } }
+  const a = s && s.getAudioTracks()[0], v = s && s.getVideoTracks()[0];
+  hasMic = !!a; hasCam = !!v;
+  if (a) outAudio = a; else {
+    const ctx = new AudioContext(), d = ctx.createMediaStreamDestination(); outAudio = d.stream.getAudioTracks()[0]; dummyStop.push(() => ctx.close());
+  }
+  if (v) { outVideo = v; camTrack = v; } else {
+    const cv = document.createElement('canvas'); cv.width = 320; cv.height = 180;
+    cv.getContext('2d').fillRect(0, 0, 320, 180); outVideo = cv.captureStream(1).getVideoTracks()[0];
+  }
+  micOn = hasMic; camOn = hasCam;
+  outAudio.enabled = micOn; outVideo.enabled = camOn;
+  localStream = new MediaStream([outAudio, outVideo]);
+  if (!hasMic || !hasCam) setTimeout(() => toast(!hasMic && !hasCam ? 'No camera or microphone found. You can still chat and share your screen.' : (!hasMic ? 'No microphone found.' : 'No camera found.')), 900);
+}
+function stopLocal() {
+  [outAudio, outVideo, camTrack, screenTrack].forEach(t => { try { t && t.stop(); } catch (e) {} });
+  dummyStop.forEach(f => { try { f(); } catch (e) {} }); dummyStop = [];
+}
+function senderFor(p, kind) { const pc = p.call && p.call.peerConnection; return pc && pc.getSenders().find(x => x.track && x.track.kind === kind); }
+function swapVideoTrack(track) {
+  for (const p of Object.values(peers)) { const s = senderFor(p, 'video'); if (s) s.replaceTrack(track).catch(() => {}); }
+  localStream.removeTrack(localStream.getVideoTracks()[0]); localStream.addTrack(track);
+  $('localTile').querySelector('video').srcObject = new MediaStream([track]);
+}
+async function switchMic() {
+  try {
+    const s = await navigator.mediaDevices.getUserMedia({audio: acon()}), t = s.getAudioTracks()[0];
+    for (const p of Object.values(peers)) { const x = senderFor(p, 'audio'); if (x) x.replaceTrack(t).catch(() => {}); }
+    localStream.removeTrack(outAudio); localStream.addTrack(t);
+    try { outAudio.stop(); } catch (e) {}
+    outAudio = t; hasMic = true; t.enabled = micOn;
+  } catch (e) { toast('Could not switch microphone.'); }
+}
+async function switchCam() {
+  try {
+    const s = await navigator.mediaDevices.getUserMedia({video: vcon()}), t = s.getVideoTracks()[0];
+    const old = outVideo;
+    if (screenTrack) { outVideo = t; } else { swapVideoTrack(t); outVideo = t; }
+    try { old.stop(); } catch (e) {}
+    camTrack = t; hasCam = true; t.enabled = camOn; refreshLocalTile();
+  } catch (e) { toast('Could not switch camera.'); }
+}
+
+/* ---------- tiles ---------- */
+function makeTile(name) {
+  const t = document.createElement('div'); t.className = 'tile';
+  t.innerHTML = '<video autoplay playsinline></video><div class="off"></div><div class="lbl"><span class="n"></span><span class="mi"></span></div>';
+  t.onclick = () => t.classList.toggle('pin');
+  const v = t.querySelector('video'); if (S.spkId && v.setSinkId) v.setSinkId(S.spkId).catch(() => {});
+  $('grid').appendChild(t); setTileName(t, name); return t;
+}
+function setTileName(t, name) { t.querySelector('.n').textContent = name; t.querySelector('.off').textContent = (name || '?').trim().charAt(0).toUpperCase(); }
+function addLocalTile() {
+  const t = makeTile(myName + ' (you)'); t.id = 'localTile';
+  const v = t.querySelector('video'); v.muted = true; v.srcObject = new MediaStream([outVideo]);
+  refreshLocalTile();
+}
+function refreshLocalTile() {
+  const t = $('localTile'); if (!t) return;
+  t.classList.toggle('camoff', !camOn && !screenTrack);
+  t.classList.toggle('screen', !!screenTrack);
+  t.querySelector('.mi').className = 'mi' + (micOn ? '' : ' muted');
+  syncButtons(); renderPeople();
+}
+function refreshTile(p) {
+  if (!p.tile) return;
+  p.tile.classList.toggle('camoff', p.cam === false);
+  p.tile.querySelector('.mi').className = 'mi' + (p.mic === false ? ' muted' : '');
+}
+function updateCount() { $('count').textContent = (Object.values(peers).filter(p => p.conn && p.conn.open).length + 1) + ' / ' + MAX + ' in room'; }
+
+/* ---------- networking ---------- */
+function wirePeer() {
+  peer.on('connection', conn => register(conn, slotOf(conn.peer)));
+  peer.on('call', call => {
+    const p = ensurePeer(call.peer); p.call = call;
+    call.answer(localStream);
+    call.on('stream', s => attachStream(call.peer, s));
+    call.on('close', () => { if (p.call === call) p.call = null; });
+  });
+  peer.on('disconnected', () => { try { peer.reconnect(); } catch (e) {} });
+  peer.on('error', e => {
+    if (e.type === 'peer-unavailable') {
+      const m = /(\S+-(?:\d|host))\s*$/.exec(e.message || ''); if (m && peers[m[1]] && !peers[m[1]].hello) dropPeer(m[1], true);
+    } else console.warn('peer error', e.type);
+  });
+}
+function connectTo(j) {
+  const id = idOf(j);
+  if (peers[id] && peers[id].conn) return;
+  register(peer.connect(id, {reliable: true}), mySlot);
+}
+function ensurePeer(id) {
+  if (!peers[id]) peers[id] = {slot: slotOf(id), isHost: id.endsWith('-host'), name: 'Guest', mic: true, cam: true, hello: false, conn: null, connInit: 99, call: null, stream: null, tile: null};
+  return peers[id];
+}
+function ensureTile(p) { if (!p.tile) p.tile = makeTile(p.name); return p.tile; }
+function register(conn, init) {
+  const id = conn.peer, p = ensurePeer(id);
+  if (p.conn && p.conn !== conn) {
+    if (p.connInit <= init) { try { conn.close(); } catch (e) {} return; }
+    try { p.conn.close(); } catch (e) {}
+  }
+  p.conn = conn; p.connInit = init;
+  const onOpen = () => {
+    conn.send({t:'hello', cid: myCid, name: myName, mic: micOn, cam: camOn || !!screenTrack});
+    if (isHost && (!policy.allowMic || !policy.allowCam)) conn.send({t:'ctl', act:'policy', allowMic: policy.allowMic, allowCam: policy.allowCam});
+    if (isHost && bannedSet.size) conn.send({t:'ctl', act:'bans', list: [...bannedSet]});
+    updateCount();
+    try { conn.send({t:'y', u: toAB(Y.encodeStateAsUpdate(doc))}); } catch (e) {}
+    if (mySlot < p.slot && !p.call) callPeer(id);
+  };
+  if (conn.open) onOpen(); else conn.on('open', onOpen);
+  conn.on('data', d => onData(id, d));
+  conn.on('close', () => { if (p.conn === conn) dropPeer(id); });
+  conn.on('error', () => { if (p.conn === conn) dropPeer(id); });
+  setTimeout(() => { if (p.conn === conn && !conn.open) dropPeer(id, true); }, 6000);
+}
+function callPeer(id) {
+  const p = peers[id], call = peer.call(id, localStream);
+  p.call = call;
+  call.on('stream', s => attachStream(id, s));
+  call.on('close', () => { if (p.call === call) p.call = null; });
+}
+function attachStream(id, s) { const p = peers[id]; if (!p) return; p.stream = s; ensureTile(p).querySelector('video').srcObject = s; }
+function dropPeer(id, silent) {
+  const p = peers[id]; if (!p) return;
+  try { p.call && p.call.close(); } catch (e) {}
+  try { p.conn && p.conn.close(); } catch (e) {}
+  try { if (monModel && p.decoIds) monModel.deltaDecorations(p.decoIds, []); } catch (e) {}
+  failIncoming(id);
+  p.tile && p.tile.remove(); delete peers[id];
+  updateCount(); renderPeople();
+  if (!silent && p.hello) { sys(p.name + ' left.'); beep(330); }
+}
+function broadcast(msg) { for (const p of Object.values(peers)) if (p.conn && p.conn.open) { try { p.conn.send(msg); } catch (e) {} } }
+
+const incoming = {};
+function onData(id, d) {
+  const p = peers[id]; if (!p || !d) return;
+  switch (d.t) {
+    case 'hello': {
+      p.cid = String(d.cid || '').slice(0, 40);
+      if (isHost && p.cid && bans[p.cid]) {
+        try { p.conn.send({t:'ctl', act:'remove', banned: true}); } catch (e) {}
+        setTimeout(() => dropPeer(id, true), 500); return;
+      }
+      if (!isHost && p.cid && bannedSet.has(p.cid)) { dropPeer(id, true); return; }
+      const first = !p.hello; p.hello = true; p.name = String(d.name || 'Guest').slice(0, 24); p.mic = d.mic; p.cam = d.cam;
+      ensureTile(p); if (p.stream) p.tile.querySelector('video').srcObject = p.stream;
+      setTileName(p.tile, p.name); refreshTile(p);
+      if (first) { sys(p.name + (p.isHost ? ' (host)' : '') + ' joined.'); beep(880); }
+      updateCount(); renderPeople(); applySettings(); break;
+    }
+    case 'cur': if (Number.isInteger(d.a) && Number.isInteger(d.b)) { p.cur = {a: d.a, b: d.b}; drawCursor(p); } break;
+    case 'st': p.mic = d.mic; p.cam = d.cam; refreshTile(p); renderPeople(); break;
+    case 'chat': addMsg(p.name, String(d.text || '').slice(0, 2000), false); if (document.hidden || !$('chatP').classList.contains('on')) beep(520, .08); break;
+    case 'y': try { Y.applyUpdate(doc, toU8(d.u), 'remote'); } catch (e) { console.warn(e); } break;
+    case 'ctl': if (p.isHost) onControl(d); break;   // only the verified host id may send controls
+    case 'fm': onFileOffer(id, p, d); break;
+    case 'fa': { const tr = sending[d.id]; if (tr && !tr.recips[id]) sendTo(tr, id); break; }
+    case 'fd': { const tr = sending[d.id]; if (tr && tr.recips[id]) { tr.recips[id].cancelled = true; updSend(tr); } break; }
+    case 'fc': onFileChunk(id, d); break;
+    case 'fe': onFileEnd(id, d); break;
+  }
+}
+
+/* ---------- host controls ---------- */
+function onControl(d) {
+  if (d.act === 'mute') { if (micOn) { micOn = false; outAudio.enabled = false; } toast('The host muted you.'); refreshLocalTile(); announceState(); }
+  else if (d.act === 'cam') {
+    camOn = false; if (camTrack) camTrack.enabled = false;
+    if (screenTrack) stopShare();
+    toast('The host turned off your video.'); refreshLocalTile(); announceState();
+  }
+  else if (d.act === 'policy') {
+    policy = {allowMic: d.allowMic !== false, allowCam: d.allowCam !== false};
+    toast(policy.allowMic && policy.allowCam ? 'The host allows you to use mic and video.' : 'The host changed what you can turn on.');
+  }
+  else if (d.act === 'bans' && Array.isArray(d.list)) {
+    bannedSet = new Set(d.list.map(x => String(x).slice(0, 40)));
+    if (bannedSet.has(myCid)) return leaveRoom('You have been banned from this room.');
+    Object.entries(peers).forEach(([id, q]) => { if (q.cid && bannedSet.has(q.cid)) dropPeer(id, true); });
+  }
+  else if (d.act === 'remove') leaveRoom(d.banned ? 'You have been banned from this room.' : 'You were removed from the room by the host.');
+}
+function ctl(id, act) { const p = peers[id]; if (isHost && p && p.conn && p.conn.open) p.conn.send({t:'ctl', act}); }
+function saveBans() { lsSet('mr_bans_' + code, JSON.stringify(bans)); bannedSet = new Set(Object.keys(bans)); broadcast({t:'ctl', act:'bans', list: [...bannedSet]}); renderBans(); }
+function banPeer(id) {
+  const p = peers[id]; if (!isHost || !p || !p.cid) return toast('Cannot ban this person yet.');
+  bans[p.cid] = p.name; saveBans();
+  try { p.conn.send({t:'ctl', act:'remove', banned: true}); } catch (e) {}
+  setTimeout(() => dropPeer(id, true), 500); sys(p.name + ' was banned.');
+}
+function renderBans() {
+  const el = $('banList'); if (!el) return; el.innerHTML = '';
+  const ids = Object.keys(bans);
+  if (!ids.length) { const n = document.createElement('div'); n.className = 'note'; n.textContent = 'No one is banned.'; el.appendChild(n); return; }
+  ids.forEach(cid => {
+    const r = document.createElement('div'); r.className = 'set';
+    const l = document.createElement('div'); l.className = 'l'; l.textContent = bans[cid] || 'Unknown';
+    const c = document.createElement('div'); c.className = 'c auto';
+    const b = document.createElement('button'); b.className = 'sm'; b.textContent = 'Unban';
+    b.onclick = () => { delete bans[cid]; saveBans(); };
+    c.appendChild(b); r.append(l, c); el.appendChild(r);
+  });
+}
+function ctlAll(act) { Object.keys(peers).forEach(id => ctl(id, act)); }
+function sendPolicy() { broadcast({t:'ctl', act:'policy', allowMic: policy.allowMic, allowCam: policy.allowCam}); }
+
+function renderPeople() {
+  const el = $('people'); if (!el || !peer) return; el.innerHTML = '';
+  const hostHere = isHost || Object.values(peers).some(p => p.isHost && p.hello);
+  if (!hostHere) { const n = document.createElement('div'); n.className = 'sys'; n.textContent = 'The host is not in the room, so host controls are unavailable.'; el.appendChild(n); }
+  const row = (name, mic, cam, host, me, id) => {
+    const d = document.createElement('div'); d.className = 'person';
+    const h = document.createElement('div'); h.className = 'h';
+    const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = name + (me ? ' (you)' : ''); h.appendChild(nm);
+    if (host) { const b = document.createElement('span'); b.className = 'badge'; b.textContent = 'Host'; h.appendChild(b); }
+    const st = document.createElement('span'); st.textContent = (mic ? '🎤' : '🔇') + ' ' + (cam ? '📷' : '🚫'); h.appendChild(st);
+    d.appendChild(h);
+    if (isHost && !me && id) {
+      const a = document.createElement('div'); a.className = 'acts';
+      const mk = (t, f, c) => { const b = document.createElement('button'); b.className = 'sm ' + (c || ''); b.textContent = t; b.onclick = f; a.appendChild(b); };
+      mk('Mute', () => ctl(id, 'mute')); mk('Stop video', () => ctl(id, 'cam'));
+      mk('Remove', () => { if (confirm('Remove ' + name + ' from the room?')) ctl(id, 'remove'); }, 'rm');
+      mk('Ban', () => { if (confirm('Ban ' + name + '? They will not be able to rejoin from this browser.')) banPeer(id); }, 'rm');
+      d.appendChild(a);
+    }
+    el.appendChild(d);
+  };
+  row(myName, micOn, camOn || !!screenTrack, isHost, true);
+  Object.entries(peers).filter(([, p]) => p.hello).sort((a, b) => a[1].slot - b[1].slot)
+    .forEach(([id, p]) => row(p.name, p.mic !== false, p.cam !== false, p.isHost, false, id));
+}
+
+/* ---------- controls ---------- */
+function syncButtons() {
+  $('micBtn').textContent = micOn ? '🎤 Mute' : '🎤 Unmute';
+  $('micBtn').classList.toggle('offbtn', !micOn);
+  $('camBtn').textContent = camOn ? '📷 Stop video' : '📷 Start video';
+  $('camBtn').classList.toggle('offbtn', !camOn);
+  $('shareBtn').textContent = screenTrack ? '🖥 Stop sharing' : '🖥 Share screen';
+  $('shareBtn').classList.toggle('sharing', !!screenTrack);
+}
+function announceState() { broadcast({t:'st', mic: micOn, cam: camOn || !!screenTrack}); }
+$('micBtn').onclick = () => {
+  if (!hasMic) return toast('No microphone available.');
+  if (!micOn && !isHost && !policy.allowMic) return toast('The host has disabled unmuting.');
+  micOn = !micOn; outAudio.enabled = micOn; refreshLocalTile(); announceState();
+};
+$('camBtn').onclick = () => {
+  if (!hasCam) return toast('No camera available.');
+  if (!camOn && !isHost && !policy.allowCam) return toast('The host has disabled turning on video.');
+  camOn = !camOn; if (camTrack) camTrack.enabled = camOn; refreshLocalTile(); announceState();
+};
+$('shareBtn').onclick = async () => {
+  if (screenTrack) return stopShare();
+  if (!isHost && !policy.allowCam) return toast('The host has disabled video and screen sharing.');
+  if (!navigator.mediaDevices.getDisplayMedia) return toast('Screen sharing is not supported on this device.');
+  try {
+    const s = await navigator.mediaDevices.getDisplayMedia({video:true});
+    screenTrack = s.getVideoTracks()[0]; screenTrack.onended = stopShare;
+    swapVideoTrack(screenTrack); refreshLocalTile(); announceState();
+  } catch (e) { /* cancelled */ }
+};
+function stopShare() {
+  if (!screenTrack) return;
+  const st = screenTrack; screenTrack = null; st.onended = null; st.stop();
+  swapVideoTrack(outVideo); refreshLocalTile(); announceState();
+}
+$('copyBtn').onclick = () => navigator.clipboard.writeText(location.origin + location.pathname + '#' + code).then(() => toast('Invite link copied'));
+function leaveRoom(msg) {
+  Object.keys(peers).forEach(id => dropPeer(id, true));
+  try { peer.destroy(); } catch (e) {}
+  stopLocal();
+  try { if (msg) sessionStorage.setItem('mr_msg', msg); } catch (e) {}
+  location.hash = ''; location.reload();
+}
+$('leaveBtn').onclick = () => leaveRoom();
+
+/* ---------- chat & files ---------- */
+document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#tabs button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.pane').forEach(x => x.classList.toggle('on', x.id === b.dataset.p));
+  if (b.dataset.p === 'codeP') { loadMonaco(); if (mon) setTimeout(() => mon.layout(), 0); }
+});
+function addMsg(who, text, me) {
+  const d = document.createElement('div'); d.className = 'msg' + (me ? ' me' : '');
+  const s = document.createElement('small'); s.textContent = me ? 'You' : who;
+  const t = document.createElement('span'); t.textContent = text; d.append(s, t);
+  $('msgs').appendChild(d); $('msgs').scrollTop = 1e9;
+}
+function sys(t) { const d = document.createElement('div'); d.className = 'sys'; d.textContent = t; $('msgs').appendChild(d); $('msgs').scrollTop = 1e9; }
+$('chatForm').onsubmit = e => {
+  e.preventDefault(); const t = $('chatIn').value.trim(); if (!t) return;
+  $('chatIn').value = ''; addMsg(myName, t, true); broadcast({t:'chat', text: t.slice(0, 2000)});
+};
+/* ---------- file sharing (up to 2 GB: streamed in pieces, receivers accept first) ---------- */
+const sending = {};
+function fileCard(label) {
+  const el = document.createElement('div'); el.className = 'file';
+  const row = document.createElement('div'); row.textContent = label;
+  const st = document.createElement('div'); st.className = 'fst';
+  const bar = document.createElement('div'); bar.className = 'bar hidden'; bar.innerHTML = '<i></i>';
+  const acts = document.createElement('div'); acts.className = 'acts';
+  el.append(row, st, bar, acts); $('files').appendChild(el); $('files').scrollTop = 1e9;
+  return {el, row, st, bar, acts,
+    setBar(f) { bar.classList.remove('hidden'); bar.firstChild.style.width = Math.max(0, Math.min(100, f * 100)) + '%'; },
+    hideBar() { bar.classList.add('hidden'); },
+    button(text, fn, cls) { const b = document.createElement('button'); b.className = 'sm ' + (cls || ''); b.textContent = text; b.onclick = fn; acts.appendChild(b); return b; },
+    clear() { acts.innerHTML = ''; }};
+}
+function replyFile(pid, fid, t) { const p = peers[pid]; if (p && p.conn && p.conn.open) { try { p.conn.send({t, id: fid}); } catch (e) {} } }
+
+/* sender */
+$('fileIn').onchange = e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  if (f.size > MAX_FILE) return toast('File too large (max 2 GB).');
+  const open = Object.values(peers).filter(p => p.hello && p.conn && p.conn.open);
+  if (!open.length) return toast('Nobody else is in the room yet.');
+  const id = rid(8, 'abcdefghijklmnopqrstuvwxyz0123456789');
+  const ui = fileCard('You: ' + f.name + ' (' + fmt(f.size) + ')');
+  const tr = sending[id] = {id, file: f, size: f.size, ui, recips: {}, asked: open.length};
+  updSend(tr);
+  open.forEach(p => { try { p.conn.send({t:'fm', id, name: f.name, size: f.size}); } catch (err) {} });
+};
+function updSend(tr) {
+  const rs = Object.values(tr.recips), n = rs.length;
+  if (!n) { tr.ui.st.textContent = `Waiting for ${tr.asked} ${tr.asked === 1 ? 'person' : 'people'} to accept…`; return; }
+  const done = rs.filter(r => r.done).length, bad = rs.filter(r => r.failed || r.cancelled).length, active = n - done - bad;
+  const frac = rs.reduce((a, r) => a + (r.done ? 1 : r.sent / (tr.size || 1)), 0) / n;
+  tr.ui.setBar(frac);
+  tr.ui.st.textContent = active ? `Sending to ${active} ${active === 1 ? 'person' : 'people'} · ${Math.round(frac * 100)}%`
+    : `Sent to ${done} ${done === 1 ? 'person' : 'people'}${bad ? ', ' + bad + ' did not finish' : ''}.`;
+  if (!active) tr.ui.hideBar();
+}
+async function sendTo(tr, pid) {
+  const p = peers[pid]; if (!p || !p.conn) return;
+  const conn = p.conn, r = tr.recips[pid] = {sent: 0, done: false, failed: false, cancelled: false};
+  try {
+    for (let o = 0, k = 0; o < tr.size; o += CHUNK, k++) {
+      if (r.cancelled) break;
+      const buf = await tr.file.slice(o, o + CHUNK).arrayBuffer();
+      while (conn.open && !r.cancelled && ((conn.dataChannel && conn.dataChannel.bufferedAmount > 4e6) || conn.bufferSize > 100)) await sleep(20);
+      if (r.cancelled) break;
+      if (!conn.open) { r.failed = true; break; }
+      conn.send({t:'fc', id: tr.id, d: buf}); r.sent = o + buf.byteLength;
+      if (k % 32 === 0) updSend(tr);
+    }
+    if (!r.cancelled && !r.failed) { conn.send({t:'fe', id: tr.id}); r.done = true; }
+  } catch (e) { r.failed = true; }
+  updSend(tr);
+}
+
+/* receiver */
+function onFileOffer(pid, p, d) {
+  if (!(d.size >= 0 && d.size <= MAX_FILE)) return;
+  const key = pid + d.id, name = String(d.name || 'file').slice(0, 120);
+  const ui = fileCard(`${p.name}: ${name} (${fmt(d.size)})`);
+  const f = incoming[key] = {key, id: d.id, from: pid, name, size: d.size, got: 0, lastUi: 0, on: false, ui, sink: null, err: null};
+  const big = d.size > 500 * 1024 * 1024 && !window.showSaveFilePicker;
+  ui.st.textContent = big ? 'Large file. This browser may run out of memory, so Chrome or Edge on a computer works best.' : 'Wants to send you this file.';
+  ui.button('Accept', () => acceptFile(f), 'pri');
+  ui.button('Decline', () => { replyFile(pid, d.id, 'fd'); delete incoming[key]; ui.clear(); ui.st.textContent = 'Declined.'; });
+}
+async function acceptFile(f) {
+  let sink = null;
+  if (window.showSaveFilePicker) {            // stream straight to disk (Chrome, Edge): no size limit from memory
+    try {
+      const h = await window.showSaveFilePicker({suggestedName: f.name}), w = await h.createWritable();
+      let q = Promise.resolve();
+      sink = {push: u => { q = q.then(() => w.write(u)).catch(e => { f.err = e; }); },
+        finish: async () => { await q; await w.close(); return null; },
+        abort: async () => { try { await q; } catch (e) {} try { await w.abort(); } catch (e) {} }};
+    } catch (e) { if (e && e.name === 'AbortError') return; sink = null; }
+  }
+  if (!sink) {                                // other browsers: collect in blocks the browser can keep on disk
+    let parts = [], blobs = [], bytes = 0;
+    sink = {push: u => { parts.push(u); bytes += u.byteLength; if (bytes > 64 * 1024 * 1024) { blobs.push(new Blob(parts)); parts = []; bytes = 0; } },
+      finish: async () => { blobs.push(new Blob(parts)); parts = []; return new Blob(blobs); },
+      abort: async () => { parts = []; blobs = []; }};
+  }
+  f.sink = sink; f.on = true;
+  f.ui.clear(); f.ui.st.textContent = 'Receiving…'; f.ui.setBar(0);
+  f.ui.button('Cancel', () => cancelIncoming(f));
+  replyFile(f.from, f.id, 'fa');
+}
+function cancelIncoming(f) {
+  f.on = false; delete incoming[f.key]; replyFile(f.from, f.id, 'fd');
+  if (f.sink) f.sink.abort(); f.ui.clear(); f.ui.hideBar(); f.ui.st.textContent = 'Cancelled.';
+}
+function onFileChunk(pid, d) {
+  const f = incoming[pid + d.id]; if (!f || !f.on) return;
+  const u = toU8(d.d); f.got += u.byteLength; f.sink.push(u);
+  if (f.got - f.lastUi > 1e6 || f.got >= f.size) { f.lastUi = f.got; f.ui.setBar(f.got / (f.size || 1)); f.ui.st.textContent = `Receiving… ${Math.round(100 * f.got / (f.size || 1))}%`; }
+}
+async function onFileEnd(pid, d) {
+  const f = incoming[pid + d.id]; if (!f || !f.on) return;
+  f.on = false; delete incoming[f.key]; f.ui.st.textContent = 'Finishing…';
+  try {
+    const blob = await f.sink.finish(); if (f.err) throw f.err;
+    f.ui.hideBar(); f.ui.clear();
+    if (blob) {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = f.name.replace(/[\\/]/g, '_'); a.textContent = 'Download';
+      f.ui.st.textContent = 'Received. '; f.ui.st.appendChild(a);
+    } else f.ui.st.textContent = 'Saved to your device.';
+  } catch (e) { f.ui.hideBar(); f.ui.st.textContent = 'Could not save the file (' + (e && e.message || 'error') + ').'; }
+}
+function failIncoming(pid) {
+  Object.values(incoming).filter(f => f.from === pid).forEach(f => {
+    const was = f.on; f.on = false; delete incoming[f.key];
+    if (f.sink) f.sink.abort(); f.ui.clear(); f.ui.hideBar();
+    f.ui.st.textContent = was ? 'Interrupted: the sender left.' : 'The sender left.';
+  });
+}
+
+/* ---------- settings UI ---------- */
+function seg(id, key, after) {
+  const box = $(id), mark = () => box.querySelectorAll('button').forEach(b => b.classList.toggle('on', String(S[key]) === b.dataset.v));
+  box.querySelectorAll('button').forEach(b => b.onclick = () => { S[key] = b.dataset.v; saveS(); mark(); applySettings(); after && after(); });
+  mark();
+}
+function chk(id, key, after) { const e = $(id); e.checked = !!S[key]; e.onchange = () => { S[key] = e.checked; saveS(); applySettings(); after && after(); }; }
+function buildSettings() {
+  seg('segSize', 'size'); seg('segTab', 'tab');
+  seg('segQuality', 'quality', () => { if (camTrack) camTrack.applyConstraints(vcon()).catch(() => {}); });
+  chk('setLint', 'lint'); chk('setFormatSave', 'formatOnSave'); chk('setFormatType', 'formatOnType'); chk('setAutoTags', 'autoTags'); chk('setSnippets', 'snippets'); chk('setSuggestBr', 'suggestBrackets'); chk('setFixBr', 'completeBrackets'); chk('setLineNums', 'lineNums'); chk('setMinimap', 'minimap'); chk('setNames', 'showNames'); chk('setMirror', 'mirror'); chk('setHideSelf', 'hideSelf'); chk('setSounds', 'sounds'); chk('setWrap', 'wrap');
+  chk('setEC', 'ec', () => peer && hasMic && switchMic()); chk('setNS', 'ns', () => peer && hasMic && switchMic()); chk('setAGC', 'agc', () => peer && hasMic && switchMic());
+  const sw = $('swatches'); sw.innerHTML = '';
+  ACCENTS.forEach(c => { const b = document.createElement('button'); b.className = 'sw' + (S.accent === c ? ' on' : ''); b.style.background = c; b.setAttribute('aria-label', 'Accent ' + c);
+    b.onclick = () => { S.accent = c; saveS(); applySettings(); sw.querySelectorAll('.sw').forEach(x => x.classList.toggle('on', x === b)); }; sw.appendChild(b); });
+  $('setName').value = myName || S.name || '';
+  $('setEdFont').value = S.edFont; $('edFontVal').textContent = '(' + S.edFont + 'px)';
+}
+$('setEdFont').oninput = e => { S.edFont = +e.target.value; $('edFontVal').textContent = '(' + S.edFont + 'px)'; saveS(); applySettings(); };
+$('setName').onchange = e => {
+  const n = e.target.value.trim().slice(0, 24); if (!n) return;
+  S.name = n; saveS(); $('nameIn').value = n;
+  if (peer) { myName = n; setTileName($('localTile'), n + ' (you)'); broadcast({t:'hello', cid: myCid, name: myName, mic: micOn, cam: camOn || !!screenTrack}); renderPeople(); }
+};
+async function fillDevices() {
+  const inRoom = !!peer;
+  document.querySelectorAll('.inroom').forEach(e => e.classList.toggle('hidden', !inRoom));
+  $('avNote').classList.toggle('hidden', inRoom);
+  if (!inRoom) return;
+  let list = []; try { list = await navigator.mediaDevices.enumerateDevices(); } catch (e) {}
+  const fill = (sel, kind, key) => {
+    const el = $(sel); el.innerHTML = '';
+    const d0 = document.createElement('option'); d0.value = ''; d0.textContent = 'Default'; el.appendChild(d0);
+    list.filter(d => d.kind === kind).forEach((d, i) => { const o = document.createElement('option'); o.value = d.deviceId; o.textContent = d.label || (kind + ' ' + (i + 1)); el.appendChild(o); });
+    el.value = S[key] || '';
+  };
+  fill('selMic', 'audioinput', 'micId'); fill('selCam', 'videoinput', 'camId'); fill('selSpk', 'audiooutput', 'spkId');
+  $('selSpk').disabled = !HTMLMediaElement.prototype.setSinkId;
+}
+$('selMic').onchange = e => { S.micId = e.target.value; saveS(); switchMic(); };
+$('selCam').onchange = e => { S.camId = e.target.value; saveS(); switchCam(); };
+$('selSpk').onchange = e => { S.spkId = e.target.value; saveS(); applySettings(); };
+$('polMic').onchange = e => { policy.allowMic = e.target.checked; sendPolicy(); toast('Updated for everyone in the room.'); };
+$('polCam').onchange = e => { policy.allowCam = e.target.checked; sendPolicy(); toast('Updated for everyone in the room.'); };
+$('muteAll').onclick = () => { ctlAll('mute'); toast('Everyone has been muted.'); };
+$('camAll').onclick = () => { ctlAll('cam'); toast('Everyone\'s video has been turned off.'); };
+$('resetBtn').onclick = () => { if (!confirm('Reset all settings to defaults?')) return; const n = S.name; S = Object.assign({}, DEFAULTS, {name: n}); saveS(); applySettings(); buildSettings(); fillDevices(); };
+document.querySelectorAll('#stabs button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#stabs button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.sp-pane').forEach(x => x.classList.toggle('on', x.id === b.dataset.s));
+});
+function openSettings() { buildSettings(); fillDevices(); renderBans(); $('modal').classList.remove('hidden'); }
+function closeSettings() { $('modal').classList.add('hidden'); }
+$('gearBtn').onclick = openSettings; $('lobbyGear').onclick = openSettings; $('sClose').onclick = closeSettings;
+$('modal').onclick = e => { if (e.target === $('modal')) closeSettings(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSettings(); });
+$('themeBtn').onclick = () => { const o = ['same', 'midnight', 'daylight', 'sunset']; S.mtheme = o[(o.indexOf(S.mtheme) + 1) % o.length]; saveS(); applySettings(); renderThemePickers(); toast('Meeting theme: ' + (S.mtheme === 'same' ? 'same as interface' : THEMES[S.mtheme].name)); };
+
+window.addEventListener('beforeunload', () => { try { peer && peer.destroy(); } catch (e) {} });
+</script>
+</body>
+</html>
